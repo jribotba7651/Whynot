@@ -15,6 +15,8 @@ const cron = require('node-cron');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const chatRoutes = require('./routes/chat');
+const broadcastRoutes = require('./routes/broadcasts');
+const vibeRoutes = require('./routes/vibes');
 
 // Inicializar Express
 const app = express();
@@ -59,6 +61,8 @@ app.use('/api', authRoutes);           // POST /api/session, /api/auth/*
 app.use('/api/auth', authRoutes);      // Rutas de autenticación (Fase 4)
 app.use('/api/users', userRoutes);     // GET /api/users/nearby, perfiles
 app.use('/api/conversations', chatRoutes); // Conversaciones y mensajes
+app.use('/api/broadcasts', broadcastRoutes); // Broadcasts efímeros (Fase 6.4)
+app.use('/api/vibes', vibeRoutes);           // Sistema de vibes (Fase 6.5)
 
 // Ruta para actualizar perfil (alias directo)
 const { verifyToken } = require('./middleware/auth');

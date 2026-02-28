@@ -135,4 +135,50 @@ export const getMessages = (conversationId, before, limit = 20) => {
   return apiCall(url);
 };
 
+// --- Fase 5.1: Onboarding ---
+export const saveOnboarding = (userType, seekingTypes) =>
+  apiCall('/api/users/onboarding', {
+    method: 'PUT',
+    body: JSON.stringify({ userType, seekingTypes })
+  });
+
+// --- Fase 6.2: Reportes y bloqueos ---
+export const reportUser = (reportedUserId, reason, details) =>
+  apiCall('/api/users/reports', {
+    method: 'POST',
+    body: JSON.stringify({ reportedUserId, reason, details })
+  });
+
+export const blockUser = (blockedUserId) =>
+  apiCall('/api/users/blocks', {
+    method: 'POST',
+    body: JSON.stringify({ blockedUserId })
+  });
+
+export const unblockUser = (blockedUserId) =>
+  apiCall(`/api/users/blocks/${blockedUserId}`, { method: 'DELETE' });
+
+export const getBlockedUsers = () =>
+  apiCall('/api/users/blocks');
+
+// --- Fase 6.4: Broadcasts ---
+export const getNearbyBroadcasts = (lat, lon) =>
+  apiCall(`/api/broadcasts/nearby?lat=${lat}&lon=${lon}`);
+
+export const createBroadcast = (message) =>
+  apiCall('/api/broadcasts', {
+    method: 'POST',
+    body: JSON.stringify({ message })
+  });
+
+// --- Fase 6.5: Vibes ---
+export const giveVibe = (toUserId) =>
+  apiCall('/api/vibes', {
+    method: 'POST',
+    body: JSON.stringify({ toUserId })
+  });
+
+export const checkVibe = (userId) =>
+  apiCall(`/api/vibes/check/${userId}`);
+
 export { getToken, setToken, setRefreshToken, API_URL };

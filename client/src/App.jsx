@@ -1,5 +1,5 @@
 // Componente principal de la aplicación
-// Integra mapa, chat, perfiles y autenticación
+// Integra mapa, chat, perfiles, autenticación, onboarding, broadcasts y modo discreto
 // Orquesta la navegación entre todas las vistas
 import { useState, useCallback, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -12,44 +12,52 @@ import ProfileSetup from './components/Profile/ProfileSetup';
 import ProfileEdit from './components/Profile/ProfileEdit';
 import AuthModal from './components/Auth/AuthModal';
 import AccountSettings from './components/Auth/AccountSettings';
+import OnboardingFlow from './components/Onboarding/OnboardingFlow';
+import BroadcastFeed from './components/Broadcast/BroadcastFeed';
 import useChat from './hooks/useChat';
+import useVanillaMode from './hooks/useVanillaMode';
+import useGeolocation from './hooks/useGeolocation';
 
 // Componente interno que usa los contextos
 const AppContent = () => {
   const { user, isAnonymous, loading } = useAuth();
+  const { vanillaMode, toggleVanilla } = useVanillaMode();
+  const { location } = useGeolocation();
 
   // Estado de vistas/modales
-  const [selectedUser, setSelectedUser] = useState(null);  // Usuario cuyo perfil se ve
+  const [selectedUser, setSelectedUser] = useState(null);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [showProfileEdit, setShowProfileEdit] = useState(false);
   const [showChatList, setShowChatList] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showAccountSettings, setShowAccountSettings] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  const [conversationCount, setConversationCount] = useState(0);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showBroadcasts, setShowBroadcasts] = useState(false);
+  const [broadcastCount, setBroadcastCount] = useState(0);
 
   // Chat hook
   const {
-    activeConversation,
-    messages,
-    conversations,
-    setConversations,
-    unreadTotal,
-    setUnreadTotal,
-    typingUsers,
-    loadingMessages,
-    initiateChat,
-    sendMessage,
-    sendTyping,
-    loadMoreMessages,
-    openConversation,
-    closeChat
+    activeConversation, messages, conversations, setConversations,
+    unreadTotal, setUnreadTotal, typingUsers, loadingMessages,
+    initiateChat, sendMessage, sendTyping, loadMoreMessages,
+    openConversation, closeChat
   } = useChat();
 
-  // Target user para el chat drawer
   const [chatTarget, setChatTarget] = useState(null);
 
-  // Click en un pin del mapa → mostrar perfil o abrir chat
+  // Mostrar onboarding si no completado
+  useEffect(() => {
+    if (user && !user.onboardingComplete && !loading) {
+      // Verificar localStorage como respaldo
+      const savedType = localStorage.getItem('whynot_userType');
+      if (!savedType) {
+        setShowOnboarding(true);
+      }
+    }
+  }, [user, loading]);
+
+  // Click en un pin del mapa → mostrar perfil
   const handlePinClick = useCallback((nearbyUser) => {
     setSelectedUser(nearbyUser);
   }, []);
@@ -81,7 +89,6 @@ const AppContent = () => {
   // Prompt de perfil después de 3 conversaciones
   useEffect(() => {
     if (conversations.length >= 3 && !user?.isProfileComplete && !showProfileSetup) {
-      // Solo mostrar una vez por sesión
       const shown = sessionStorage.getItem('profile_prompt_shown');
       if (!shown) {
         sessionStorage.setItem('profile_prompt_shown', 'true');
@@ -102,7 +109,14 @@ const AppContent = () => {
     );
   }
 
-  // Calcular mapa de no leídos por usuario (para badges en los pins)
+  // Onboarding (Fase 5.1) — se muestra ANTES del mapa
+  if (showOnboarding) {
+    return (
+      <OnboardingFlow onComplete={() => setShowOnboarding(false)} />
+    );
+  }
+
+  // Mapa de no leídos por usuario
   const chatUnreadMap = {};
   conversations.forEach(conv => {
     if (conv.unreadCount > 0 && conv.otherUser?.id) {
@@ -112,12 +126,18 @@ const AppContent = () => {
 
   return (
     <div className="h-full w-full relative">
-      {/* Mapa principal — siempre visible */}
-      <MapView onPinClick={handlePinClick} chatUnreadMap={chatUnreadMap} />
+      {/* Mapa principal */}
+      <MapView
+        onPinClick={handlePinClick}
+        chatUnreadMap={chatUnreadMap}
+        vanillaMode={vanillaMode}
+        onToggleVanilla={toggleVanilla}
+        onShowBroadcasts={() => setShowBroadcasts(true)}
+        broadcastCount={broadcastCount}
+      />
 
       {/* Botones de navegación (esquina inferior) */}
       <div className="absolute bottom-6 left-4 flex gap-3 z-20">
-        {/* Botón: Lista de chats */}
         <button
           onClick={() => setShowChatList(true)}
           className="relative w-12 h-12 bg-dark-200/90 backdrop-blur-sm rounded-full flex items-center justify-center
@@ -127,7 +147,6 @@ const AppContent = () => {
           <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
           </svg>
-          {/* Badge de no leídos */}
           {unreadTotal > 0 && (
             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
               {unreadTotal > 99 ? '99+' : unreadTotal}
@@ -150,7 +169,6 @@ const AppContent = () => {
             </svg>
           </button>
 
-          {/* Menú desplegable */}
           {showMenu && (
             <div className="absolute bottom-14 right-0 bg-dark-200 border border-dark-100 rounded-xl shadow-xl overflow-hidden min-w-[180px] animate-fade-in">
               <button
@@ -158,8 +176,7 @@ const AppContent = () => {
                 className="w-full px-4 py-3 text-left text-sm hover:bg-dark-100 transition-colors flex items-center gap-2"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" />
                 </svg>
                 Editar perfil
               </button>
@@ -203,10 +220,7 @@ const AppContent = () => {
         </div>
       </div>
 
-      {/* Cerrar menú al tocar fuera */}
-      {showMenu && (
-        <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
-      )}
+      {showMenu && <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />}
 
       {/* Modales y Drawers */}
       <ProfileCard
@@ -227,6 +241,7 @@ const AppContent = () => {
         onLoadMore={loadMoreMessages}
         loadingMore={loadingMessages}
         currentUserId={user?.id}
+        vanillaMode={vanillaMode}
       />
 
       <ChatList
@@ -244,20 +259,21 @@ const AppContent = () => {
         onComplete={() => setShowProfileSetup(false)}
       />
 
-      <ProfileEdit
-        isOpen={showProfileEdit}
-        onClose={() => setShowProfileEdit(false)}
-      />
+      <ProfileEdit isOpen={showProfileEdit} onClose={() => setShowProfileEdit(false)} />
 
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-      />
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
 
       <AccountSettings
         isOpen={showAccountSettings}
         onClose={() => setShowAccountSettings(false)}
         onOpenAuth={() => setShowAuthModal(true)}
+      />
+
+      <BroadcastFeed
+        isOpen={showBroadcasts}
+        onClose={() => setShowBroadcasts(false)}
+        location={location}
+        vanillaMode={vanillaMode}
       />
     </div>
   );

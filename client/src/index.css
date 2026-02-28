@@ -152,3 +152,32 @@ html, body, #root {
 .animate-slide-right {
   animation: slideRight 0.3s ease-out;
 }
+
+/* Pin badge para unread count (Fase 5.2) */
+.pin-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background-color: #ef4444;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  min-width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* Ocultar scrollbar (Fase 5.3 — FilterBar horizontal scroll) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

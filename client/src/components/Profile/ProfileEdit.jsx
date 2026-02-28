@@ -1,9 +1,11 @@
 // Edición de perfil propio
-// Permite actualizar nombre, edad, bio, lookingFor, intereses y privacidad
+// Incluye: nombre, edad, bio, lookingFor, intereses, privacidad, Soy/Busco, radio de ubicación
 import { useState, useEffect } from 'react';
 import { updateProfile } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import Avatar from '../UI/Avatar';
+import LocationPrivacySelector from '../Privacy/LocationPrivacySelector';
+import { USER_TYPE_LABELS } from '../../utils/pinColors';
 
 const LOOKING_FOR_OPTIONS = [
   { value: 'amistad', label: 'Amistad' },
@@ -17,6 +19,15 @@ const INTERESTS = [
   'viajes', 'gaming', 'lectura', 'fitness', 'cine'
 ];
 
+const USER_TYPE_OPTIONS = Object.entries(USER_TYPE_LABELS).map(([value, label]) => ({ value, label }));
+
+const SEEKING_OPTIONS = [
+  { value: 'men', label: 'Hombres' },
+  { value: 'women', label: 'Mujeres' },
+  { value: 'couples', label: 'Parejas' },
+  { value: 'anyone', label: 'Todos' }
+];
+
 const ProfileEdit = ({ isOpen, onClose }) => {
   const { user, updateUser } = useAuth();
 
@@ -27,11 +38,13 @@ const ProfileEdit = ({ isOpen, onClose }) => {
   const [interests, setInterests] = useState([]);
   const [showAge, setShowAge] = useState(true);
   const [showDistance, setShowDistance] = useState(true);
+  const [userType, setUserType] = useState(null);
+  const [seekingTypes, setSeekingTypes] = useState([]);
+  const [privacyRadius, setPrivacyRadius] = useState(500);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  // Cargar datos existentes del perfil
   useEffect(() => {
     if (isOpen && user) {
       setDisplayName(user.profile?.displayName || user.displayName || '');
@@ -41,6 +54,9 @@ const ProfileEdit = ({ isOpen, onClose }) => {
       setInterests(user.profile?.interests || []);
       setShowAge(user.profile?.showAge !== false);
       setShowDistance(user.profile?.showDistance !== false);
+      setUserType(user.userType || null);
+      setSeekingTypes(user.seekingTypes || []);
+      setPrivacyRadius(user.privacyRadius || 500);
     }
   }, [isOpen, user]);
 
@@ -52,30 +68,41 @@ const ProfileEdit = ({ isOpen, onClose }) => {
     });
   };
 
+  const toggleSeeking = (value) => {
+    if (value === 'anyone') {
+      if (seekingTypes.includes('anyone')) setSeekingTypes([]);
+      else setSeekingTypes(['men', 'women', 'couples', 'anyone']);
+    } else {
+      setSeekingTypes(prev => {
+        let next = prev.includes(value)
+          ? prev.filter(s => s !== value && s !== 'anyone')
+          : [...prev.filter(s => s !== 'anyone'), value];
+        if (next.includes('men') && next.includes('women') && next.includes('couples')) next.push('anyone');
+        return next;
+      });
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
     setError('');
     setSuccess(false);
-
     try {
-      const profileData = {
+      const result = await updateProfile({
         displayName: displayName.trim(),
         age: age ? parseInt(age) : undefined,
         bio: bio.trim(),
-        lookingFor,
-        interests,
-        showAge,
-        showDistance
-      };
-
-      const result = await updateProfile(profileData);
-
+        lookingFor, interests, showAge, showDistance,
+        userType, seekingTypes, privacyRadius
+      });
       updateUser({
         displayName: displayName.trim(),
         profile: result.profile,
-        isProfileComplete: result.isProfileComplete
+        isProfileComplete: result.isProfileComplete,
+        userType: result.userType,
+        seekingTypes: result.seekingTypes,
+        privacyRadius: result.privacyRadius
       });
-
       setSuccess(true);
       setTimeout(() => setSuccess(false), 2000);
     } catch (err) {
@@ -90,159 +117,119 @@ const ProfileEdit = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex flex-col animate-slide-up">
       <div className="flex-shrink-0 h-8 md:h-16" onClick={onClose} />
-
       <div className="flex-1 bg-dark-300 rounded-t-2xl overflow-y-auto">
-        {/* Header */}
         <div className="sticky top-0 bg-dark-300 border-b border-dark-100 px-4 py-3 flex items-center justify-between z-10">
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
-            Cancelar
-          </button>
+          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">Cancelar</button>
           <h2 className="font-semibold">Editar perfil</h2>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="text-primary-400 font-medium hover:text-primary-300 transition-colors disabled:opacity-40"
-          >
+          <button onClick={handleSave} disabled={saving}
+            className="text-primary-400 font-medium hover:text-primary-300 transition-colors disabled:opacity-40">
             {saving ? 'Guardando...' : 'Guardar'}
           </button>
         </div>
 
         <div className="px-4 py-5 space-y-5">
-          {/* Preview del avatar */}
           <div className="flex justify-center">
-            <Avatar
-              name={displayName || user?.displayName}
-              userId={user?.id}
-              size="xl"
-            />
+            <Avatar name={displayName || user?.displayName} userId={user?.id} size="xl" />
           </div>
 
-          {/* Nombre */}
           <div>
             <label className="block text-sm text-gray-400 mb-1">Nombre</label>
-            <input
-              type="text"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value.substring(0, 30))}
+            <input type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value.substring(0, 30))}
               placeholder="Tu nombre"
-              className="w-full bg-dark-200 border border-dark-100 rounded-xl px-4 py-3 text-white
-                         focus:border-primary-500 focus:outline-none"
-            />
+              className="w-full bg-dark-200 border border-dark-100 rounded-xl px-4 py-3 text-white focus:border-primary-500 focus:outline-none" />
             <p className="text-xs text-gray-500 mt-1">{displayName.length}/30</p>
           </div>
 
-          {/* Edad */}
           <div>
             <label className="block text-sm text-gray-400 mb-1">Edad</label>
-            <input
-              type="number"
-              value={age}
-              onChange={(e) => setAge(e.target.value)}
-              min="18"
-              max="99"
-              className="w-full bg-dark-200 border border-dark-100 rounded-xl px-4 py-3 text-white
-                         focus:border-primary-500 focus:outline-none"
-            />
+            <input type="number" value={age} onChange={(e) => setAge(e.target.value)} min="18" max="99"
+              className="w-full bg-dark-200 border border-dark-100 rounded-xl px-4 py-3 text-white focus:border-primary-500 focus:outline-none" />
           </div>
 
-          {/* Bio */}
           <div>
             <label className="block text-sm text-gray-400 mb-1">Bio</label>
-            <textarea
-              value={bio}
-              onChange={(e) => setBio(e.target.value.substring(0, 200))}
-              placeholder="Cuéntanos sobre ti..."
-              rows={3}
-              className="w-full bg-dark-200 border border-dark-100 rounded-xl px-4 py-3 text-white text-sm
-                         focus:border-primary-500 focus:outline-none resize-none"
-            />
+            <textarea value={bio} onChange={(e) => setBio(e.target.value.substring(0, 200))}
+              placeholder="Cuéntanos sobre ti..." rows={3}
+              className="w-full bg-dark-200 border border-dark-100 rounded-xl px-4 py-3 text-white text-sm focus:border-primary-500 focus:outline-none resize-none" />
             <p className="text-xs text-gray-500 mt-1">{bio.length}/200</p>
           </div>
 
-          {/* Qué buscas */}
+          {/* Soy (Fase 5.1) */}
           <div>
-            <label className="block text-sm text-gray-400 mb-2">¿Qué buscas?</label>
+            <label className="block text-sm text-gray-400 mb-2">Soy...</label>
             <div className="flex flex-wrap gap-2">
-              {LOOKING_FOR_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => setLookingFor(opt.value)}
+              {USER_TYPE_OPTIONS.map((opt) => (
+                <button key={opt.value} onClick={() => setUserType(opt.value)}
                   className={`px-4 py-2 rounded-full text-sm transition-colors ${
-                    lookingFor === opt.value
-                      ? 'bg-primary-600 text-white'
-                      : 'bg-dark-200 text-gray-300 hover:bg-dark-100'
-                  }`}
-                >
+                    userType === opt.value ? 'bg-primary-600 text-white' : 'bg-dark-200 text-gray-300 hover:bg-dark-100'}`}>
                   {opt.label}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Intereses */}
+          {/* Busco (Fase 5.1) */}
           <div>
-            <label className="block text-sm text-gray-400 mb-2">
-              Intereses ({interests.length}/5)
-            </label>
+            <label className="block text-sm text-gray-400 mb-2">Busco...</label>
+            <div className="flex flex-wrap gap-2">
+              {SEEKING_OPTIONS.map((opt) => (
+                <button key={opt.value} onClick={() => toggleSeeking(opt.value)}
+                  className={`px-4 py-2 rounded-full text-sm transition-colors ${
+                    seekingTypes.includes(opt.value) ? 'bg-primary-600 text-white' : 'bg-dark-200 text-gray-300 hover:bg-dark-100'}`}>
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-400 mb-2">Tipo de conexión</label>
+            <div className="flex flex-wrap gap-2">
+              {LOOKING_FOR_OPTIONS.map((opt) => (
+                <button key={opt.value} onClick={() => setLookingFor(opt.value)}
+                  className={`px-4 py-2 rounded-full text-sm transition-colors ${
+                    lookingFor === opt.value ? 'bg-primary-600 text-white' : 'bg-dark-200 text-gray-300 hover:bg-dark-100'}`}>
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-400 mb-2">Intereses ({interests.length}/5)</label>
             <div className="flex flex-wrap gap-2">
               {INTERESTS.map((interest) => (
-                <button
-                  key={interest}
-                  onClick={() => toggleInterest(interest)}
+                <button key={interest} onClick={() => toggleInterest(interest)}
                   className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
-                    interests.includes(interest)
-                      ? 'bg-primary-600 text-white'
-                      : 'bg-dark-200 text-gray-300 hover:bg-dark-100'
-                  }`}
-                >
+                    interests.includes(interest) ? 'bg-primary-600 text-white' : 'bg-dark-200 text-gray-300 hover:bg-dark-100'}`}>
                   {interest}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Privacidad */}
           <div className="space-y-3">
             <label className="block text-sm text-gray-400">Privacidad</label>
-
             <label className="flex items-center justify-between cursor-pointer">
               <span className="text-sm">Mostrar mi edad</span>
-              <div
-                onClick={() => setShowAge(!showAge)}
-                className={`w-11 h-6 rounded-full relative transition-colors cursor-pointer ${
-                  showAge ? 'bg-primary-600' : 'bg-dark-100'
-                }`}
-              >
-                <div
-                  className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
-                    showAge ? 'translate-x-5' : 'translate-x-0.5'
-                  }`}
-                />
+              <div onClick={() => setShowAge(!showAge)}
+                className={`w-11 h-6 rounded-full relative transition-colors cursor-pointer ${showAge ? 'bg-primary-600' : 'bg-dark-100'}`}>
+                <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${showAge ? 'translate-x-5' : 'translate-x-0.5'}`} />
               </div>
             </label>
-
             <label className="flex items-center justify-between cursor-pointer">
               <span className="text-sm">Mostrar distancia</span>
-              <div
-                onClick={() => setShowDistance(!showDistance)}
-                className={`w-11 h-6 rounded-full relative transition-colors cursor-pointer ${
-                  showDistance ? 'bg-primary-600' : 'bg-dark-100'
-                }`}
-              >
-                <div
-                  className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
-                    showDistance ? 'translate-x-5' : 'translate-x-0.5'
-                  }`}
-                />
+              <div onClick={() => setShowDistance(!showDistance)}
+                className={`w-11 h-6 rounded-full relative transition-colors cursor-pointer ${showDistance ? 'bg-primary-600' : 'bg-dark-100'}`}>
+                <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${showDistance ? 'translate-x-5' : 'translate-x-0.5'}`} />
               </div>
             </label>
           </div>
 
-          {/* Mensajes de estado */}
+          <LocationPrivacySelector value={privacyRadius} onChange={setPrivacyRadius} />
+
           {error && <p className="text-red-400 text-sm">{error}</p>}
           {success && <p className="text-green-400 text-sm">Perfil actualizado</p>}
-
-          {/* Espacio extra para scroll en móvil */}
           <div className="h-8" />
         </div>
       </div>

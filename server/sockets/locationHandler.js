@@ -1,11 +1,16 @@
 // Manejador de eventos de geolocalización por WebSocket
 // Recibe actualizaciones de ubicación y emite usuarios cercanos
+// Incluye: randomización de ubicación, filtro shadow-ban, filtro bloqueos
 const User = require('../models/User');
-const { buildNearbyQuery, haversineDistance } = require('../utils/geo');
+const Block = require('../models/Block');
+const { buildNearbyQuery, haversineDistance, randomizeLocation } = require('../utils/geo');
 const { DEFAULT_RADIUS_KM } = require('../config/env');
 
 // Mapa de socketId → userId para tracking rápido
 const socketUserMap = new Map();
+
+// Cache de bloqueos por usuario (se actualiza cada 30 segundos)
+const blockCache = new Map();
 
 const locationHandler = (io, socket) => {
 
@@ -38,42 +43,67 @@ const locationHandler = (io, socket) => {
         isOnline: true
       });
 
+      // Obtener lista de bloqueos (usar cache si es reciente)
+      let blockedIds = [];
+      let blockedByIds = [];
+      const cached = blockCache.get(userId);
+      if (cached && Date.now() - cached.timestamp < 30000) {
+        blockedIds = cached.blockedIds;
+        blockedByIds = cached.blockedByIds;
+      } else {
+        const blocks = await Block.find({ blockerId: userId }).select('blockedUserId').lean();
+        blockedIds = blocks.map(b => b.blockedUserId.toString());
+        const blockedBy = await Block.find({ blockedUserId: userId }).select('blockerId').lean();
+        blockedByIds = blockedBy.map(b => b.blockerId.toString());
+        blockCache.set(userId, { blockedIds, blockedByIds, timestamp: Date.now() });
+      }
+
+      const excludeIds = [userId, ...blockedIds, ...blockedByIds];
+
       // Buscar usuarios cercanos
       const staleThreshold = new Date(Date.now() - 60 * 1000); // 60 segundos
 
       const nearbyUsers = await User.find({
         ...buildNearbyQuery(longitude, latitude, DEFAULT_RADIUS_KM),
-        _id: { $ne: userId },
+        _id: { $nin: excludeIds },
         isOnline: true,
         lastSeen: { $gte: staleThreshold },
-        isDeleted: { $ne: true }
+        isDeleted: { $ne: true },
+        isShadowBanned: { $ne: true }
       })
-        .select('displayName location lastSeen profile isProfileComplete')
+        .select('displayName location lastSeen profile isProfileComplete userType seekingTypes onboardingComplete privacyRadius vibeCount')
         .limit(100)
         .lean();
 
-      // Calcular distancia y formatear respuesta
-      const usersWithDistance = nearbyUsers.map(user => ({
-        id: user._id,
-        displayName: user.profile?.displayName || user.displayName,
-        location: {
-          latitude: user.location.coordinates[1],
-          longitude: user.location.coordinates[0]
-        },
-        lastSeen: user.lastSeen,
-        distance: haversineDistance(
-          latitude, longitude,
-          user.location.coordinates[1], user.location.coordinates[0]
-        ),
-        profile: user.isProfileComplete ? {
-          lookingFor: user.profile?.lookingFor,
-          interests: user.profile?.interests,
-          avatar: user.profile?.avatar,
-          age: user.profile?.showAge ? user.profile?.age : undefined,
-          showDistance: user.profile?.showDistance
-        } : null,
-        isProfileComplete: user.isProfileComplete
-      }));
+      // Calcular distancia, formatear respuesta, y randomizar ubicación
+      const usersWithDistance = nearbyUsers.map(user => {
+        const realLat = user.location.coordinates[1];
+        const realLon = user.location.coordinates[0];
+        // Aplicar randomización — NUNCA enviar ubicación real de otro usuario
+        const randomized = randomizeLocation(realLon, realLat, user.privacyRadius || 500);
+
+        return {
+          id: user._id,
+          displayName: user.profile?.displayName || user.displayName,
+          location: {
+            latitude: randomized.latitude,
+            longitude: randomized.longitude
+          },
+          lastSeen: user.lastSeen,
+          distance: haversineDistance(latitude, longitude, realLat, realLon),
+          profile: user.isProfileComplete ? {
+            lookingFor: user.profile?.lookingFor,
+            interests: user.profile?.interests,
+            avatar: user.profile?.avatar,
+            age: user.profile?.showAge ? user.profile?.age : undefined,
+            showDistance: user.profile?.showDistance
+          } : null,
+          isProfileComplete: user.isProfileComplete,
+          userType: user.userType,
+          seekingTypes: user.seekingTypes,
+          vibeCount: user.vibeCount || 0
+        };
+      });
 
       // Emitir usuarios cercanos al cliente
       socket.emit('users:nearby', { users: usersWithDistance });
@@ -94,6 +124,7 @@ const locationHandler = (io, socket) => {
           lastSeen: new Date()
         });
         socketUserMap.delete(socket.id);
+        blockCache.delete(userId);
         console.log(`[Socket:Location] Usuario ${userId} desconectado`);
       }
     } catch (error) {

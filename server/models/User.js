@@ -67,6 +67,31 @@ const userSchema = new mongoose.Schema({
   },
   isProfileComplete: { type: Boolean, default: false },
 
+  // --- Campos de Fase 5: Onboarding Soy/Busco ---
+  userType: {
+    type: String,
+    enum: ['man', 'woman', 'couple_mf', 'couple_mm', 'couple_ff'],
+    default: null
+  },
+  seekingTypes: [{
+    type: String,
+    enum: ['men', 'women', 'couples', 'anyone']
+  }],
+  onboardingComplete: { type: Boolean, default: false },
+
+  // --- Campos de Fase 6.1: Privacidad de ubicación ---
+  privacyRadius: { type: Number, default: 500, min: 50, max: 1000 },
+
+  // --- Campos de Fase 6.2: Reportes y moderación ---
+  reportCount: { type: Number, default: 0 },
+  isShadowBanned: { type: Boolean, default: false },
+
+  // --- Campos de Fase 6.3: Modo discreto ---
+  vanillaMode: { type: Boolean, default: false },
+
+  // --- Campos de Fase 6.5: Vibes ---
+  vibeCount: { type: Number, default: 0 },
+
   // --- Campos de Fase 4: Cuentas ---
   email: {
     type: String,

@@ -39,4 +39,17 @@ const buildNearbyQuery = (longitude, latitude, radiusKm) => {
   };
 };
 
-module.exports = { kmToRadians, haversineDistance, buildNearbyQuery };
+// Aplica un offset aleatorio a coordenadas dentro de un radio dado (Fase 6.1)
+// La ubicación real NUNCA se comparte con otros usuarios
+const randomizeLocation = (longitude, latitude, radiusMeters) => {
+  const angle = Math.random() * 2 * Math.PI;
+  const distance = Math.sqrt(Math.random()) * radiusMeters;
+  const deltaLat = (distance * Math.cos(angle)) / 111320;
+  const deltaLon = (distance * Math.sin(angle)) / (111320 * Math.cos(latitude * Math.PI / 180));
+  return {
+    longitude: longitude + deltaLon,
+    latitude: latitude + deltaLat
+  };
+};
+
+module.exports = { kmToRadians, haversineDistance, buildNearbyQuery, randomizeLocation };

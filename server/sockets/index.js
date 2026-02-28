@@ -1,7 +1,8 @@
 // Configuración principal de Socket.io
-// Registra todos los handlers de eventos (ubicación, chat)
+// Registra todos los handlers de eventos (ubicación, chat, broadcasts)
 const { locationHandler } = require('./locationHandler');
 const { chatHandler } = require('./chatHandler');
+const { broadcastHandler } = require('./broadcastHandler');
 
 const initializeSockets = (io) => {
   io.on('connection', (socket) => {
@@ -16,9 +17,10 @@ const initializeSockets = (io) => {
       }
     });
 
-    // Registrar handlers de ubicación y chat
+    // Registrar handlers de ubicación, chat y broadcasts
     locationHandler(io, socket);
     chatHandler(io, socket);
+    broadcastHandler(io, socket);
   });
 
   console.log('[Socket] Socket.io inicializado');

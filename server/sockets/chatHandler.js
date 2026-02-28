@@ -1,8 +1,9 @@
-// Manejador de eventos de chat por WebSocket (Fase 2)
+// Manejador de eventos de chat por WebSocket (Fase 2 + Fase 6.2 block filter)
 // Gestiona conversaciones, mensajes y indicadores de escritura
 const Conversation = require('../models/Conversation');
 const Message = require('../models/Message');
 const User = require('../models/User');
+const Block = require('../models/Block');
 
 // Mapa de userId → socketId para enviar mensajes directos
 const userSocketMap = new Map();
@@ -33,6 +34,17 @@ const chatHandler = (io, socket) => {
 
       if (!targetUser) {
         return socket.emit('error', { message: 'Usuario no encontrado' });
+      }
+
+      // Fase 6.2: Verificar bloqueos (en ambas direcciones)
+      const blockExists = await Block.findOne({
+        $or: [
+          { blockerId: userId, blockedUserId: targetUserId },
+          { blockerId: targetUserId, blockedUserId: userId }
+        ]
+      });
+      if (blockExists) {
+        return socket.emit('error', { message: 'No puedes chatear con este usuario' });
       }
 
       // Buscar conversación existente entre ambos usuarios
@@ -111,6 +123,21 @@ const chatHandler = (io, socket) => {
 
       if (!conversation) {
         return socket.emit('error', { message: 'Conversación no encontrada' });
+      }
+
+      // Fase 6.2: Verificar si el sender está bloqueado por el receiver
+      const otherParticipant = conversation.participants.find(
+        p => p.toString() !== userId
+      );
+      if (otherParticipant) {
+        const isBlocked = await Block.findOne({
+          blockerId: otherParticipant,
+          blockedUserId: userId
+        });
+        if (isBlocked) {
+          // No entregar el mensaje — silencioso para el sender
+          return;
+        }
       }
 
       // Crear y guardar el mensaje

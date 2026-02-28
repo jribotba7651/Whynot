@@ -1,0 +1,17 @@
+{
+  "name": "WhyNot — Conecta Cerca",
+  "short_name": "WhyNot",
+  "description": "App social geolocalizada — conecta con personas cercanas en tiempo real",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#111827",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

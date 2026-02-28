@@ -1,0 +1,30 @@
+# Dependencias
+node_modules/
+.pnp
+.pnp.js
+
+# Variables de entorno
+.env
+.env.local
+.env.production
+
+# Build outputs
+client/dist/
+server/dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Coverage
+coverage/

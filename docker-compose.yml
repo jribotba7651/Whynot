@@ -1,0 +1,17 @@
+# Docker Compose para desarrollo local
+# Levanta MongoDB localmente (opcional si usas MongoDB Atlas)
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: whynot-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: geosocial
+
+volumes:
+  mongodb_data:

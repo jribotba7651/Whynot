@@ -6,6 +6,8 @@ export default defineConfig({
   plugins: [
     react()
   ],
+  // Buscar .env en la raíz del proyecto (directorio padre)
+  envDir: '../',
   server: {
     port: 5173,
     // Proxy para desarrollo — redirige llamadas API al backend

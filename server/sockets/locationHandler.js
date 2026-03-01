@@ -21,12 +21,12 @@ const locationHandler = (io, socket) => {
       const { latitude, longitude, userId } = data;
 
       if (!latitude || !longitude || !userId) {
-        return socket.emit('error', { message: 'Datos de ubicación incompletos' });
+        return socket.emit('error', { message: 'Incomplete location data' });
       }
 
       // Validar coordenadas
       if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
-        return socket.emit('error', { message: 'Coordenadas inválidas' });
+        return socket.emit('error', { message: 'Invalid coordinates' });
       }
 
       // Asociar socket con usuario
@@ -110,7 +110,7 @@ const locationHandler = (io, socket) => {
 
     } catch (error) {
       console.error('[Socket:Location] Error actualizando ubicación:', error.message);
-      socket.emit('error', { message: 'Error actualizando ubicación' });
+      socket.emit('error', { message: 'Error updating location' });
     }
   });
 

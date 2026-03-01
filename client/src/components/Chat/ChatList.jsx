@@ -1,9 +1,9 @@
-// Lista de conversaciones activas
-// Muestra todas las conversaciones del usuario con preview del último mensaje
+// Active conversations list
+// Shows all user conversations with last message preview
 import { useEffect } from 'react';
 import { getConversations } from '../../services/api';
 
-// Formatear hora del último mensaje
+// Format last message time
 const formatLastTime = (dateStr) => {
   if (!dateStr) return '';
   const date = new Date(dateStr);
@@ -12,15 +12,14 @@ const formatLastTime = (dateStr) => {
   const diffMins = Math.floor(diffMs / 60000);
   const diffHours = Math.floor(diffMs / 3600000);
 
-  if (diffMins < 1) return 'Ahora';
+  if (diffMins < 1) return 'Now';
   if (diffMins < 60) return `${diffMins}m`;
   if (diffHours < 24) return `${diffHours}h`;
-  return date.toLocaleDateString('es', { day: 'numeric', month: 'short' });
+  return date.toLocaleDateString('en', { day: 'numeric', month: 'short' });
 };
 
 const ChatList = ({ isOpen, onClose, onSelectConversation, conversations, setConversations, unreadTotal }) => {
 
-  // Cargar conversaciones al abrir
   useEffect(() => {
     if (!isOpen) return;
 
@@ -29,7 +28,7 @@ const ChatList = ({ isOpen, onClose, onSelectConversation, conversations, setCon
         const data = await getConversations();
         setConversations(data.conversations || []);
       } catch (err) {
-        console.error('[ChatList] Error cargando conversaciones:', err.message);
+        console.error('[ChatList] Error loading conversations:', err.message);
       }
     };
 
@@ -47,7 +46,7 @@ const ChatList = ({ isOpen, onClose, onSelectConversation, conversations, setCon
       <div className="flex-1 bg-dark-300 rounded-t-2xl flex flex-col overflow-hidden border-t border-dark-100">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-dark-100">
-          <h2 className="font-semibold text-lg">Mensajes</h2>
+          <h2 className="font-semibold text-lg">Messages</h2>
           <button
             onClick={onClose}
             className="w-8 h-8 rounded-full bg-dark-200 flex items-center justify-center hover:bg-dark-100 transition-colors"
@@ -58,13 +57,13 @@ const ChatList = ({ isOpen, onClose, onSelectConversation, conversations, setCon
           </button>
         </div>
 
-        {/* Lista de conversaciones */}
+        {/* Conversations list */}
         <div className="flex-1 overflow-y-auto">
           {conversations.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <p className="text-gray-500 text-sm text-center px-4">
-                No tienes conversaciones aún.<br />
-                Toca un pin en el mapa para empezar a chatear.
+                No conversations yet.<br />
+                Tap a pin on the map to start chatting.
               </p>
             </div>
           ) : (
@@ -79,17 +78,17 @@ const ChatList = ({ isOpen, onClose, onSelectConversation, conversations, setCon
                   <div className="w-12 h-12 rounded-full bg-primary-600/80 flex items-center justify-center text-lg font-bold">
                     {conv.otherUser?.displayName?.[0]?.toUpperCase() || '?'}
                   </div>
-                  {/* Indicador online */}
+                  {/* Online indicator */}
                   {conv.otherUser?.isOnline && (
                     <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-dark-300" />
                   )}
                 </div>
 
-                {/* Info de la conversación */}
+                {/* Conversation info */}
                 <div className="flex-1 min-w-0 text-left">
                   <div className="flex items-center justify-between">
                     <p className="font-medium text-sm truncate">
-                      {conv.otherUser?.displayName || 'Usuario'}
+                      {conv.otherUser?.displayName || 'User'}
                     </p>
                     <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
                       {formatLastTime(conv.lastMessage?.timestamp)}
@@ -97,7 +96,7 @@ const ChatList = ({ isOpen, onClose, onSelectConversation, conversations, setCon
                   </div>
                   <div className="flex items-center justify-between mt-0.5">
                     <p className="text-xs text-gray-400 truncate">
-                      {conv.lastMessage?.text || 'Sin mensajes'}
+                      {conv.lastMessage?.text || 'No messages'}
                     </p>
                     {conv.unreadCount > 0 && (
                       <span className="bg-primary-500 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 flex-shrink-0 ml-2">

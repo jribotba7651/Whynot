@@ -40,7 +40,7 @@ router.post('/session', sessionLimiter, async (req, res) => {
     });
   } catch (error) {
     console.error('[Auth] Error creando sesión:', error.message);
-    res.status(500).json({ error: 'Error creando sesión anónima' });
+    res.status(500).json({ error: 'Error creating anonymous session' });
   }
 });
 
@@ -52,23 +52,23 @@ router.post('/register', authLimiter, async (req, res) => {
 
     // Validaciones
     if (!email || !password) {
-      return res.status(400).json({ error: 'Email y contraseña son requeridos' });
+      return res.status(400).json({ error: 'Email and password are required' });
     }
 
     if (password.length < 8) {
-      return res.status(400).json({ error: 'La contraseña debe tener mínimo 8 caracteres' });
+      return res.status(400).json({ error: 'Password must be at least 8 characters' });
     }
 
     // Validar formato de email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return res.status(400).json({ error: 'Formato de email inválido' });
+      return res.status(400).json({ error: 'Invalid email format' });
     }
 
     // Verificar que el email no esté en uso
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
-      return res.status(409).json({ error: 'Este email ya está registrado' });
+      return res.status(409).json({ error: 'This email is already registered' });
     }
 
     // Hash de la contraseña con bcrypt (12 salt rounds)
@@ -135,7 +135,7 @@ router.post('/register', authLimiter, async (req, res) => {
     });
   } catch (error) {
     console.error('[Auth] Error en registro:', error.message);
-    res.status(500).json({ error: 'Error en el registro' });
+    res.status(500).json({ error: 'Registration error' });
   }
 });
 
@@ -145,7 +145,7 @@ router.post('/login', authLimiter, async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ error: 'Email y contraseña son requeridos' });
+      return res.status(400).json({ error: 'Email and password are required' });
     }
 
     // Buscar usuario por email
@@ -155,13 +155,13 @@ router.post('/login', authLimiter, async (req, res) => {
     });
 
     if (!user) {
-      return res.status(401).json({ error: 'Credenciales inválidas' });
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     // Verificar contraseña
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ error: 'Credenciales inválidas' });
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     // Actualizar último login
@@ -190,7 +190,7 @@ router.post('/login', authLimiter, async (req, res) => {
     });
   } catch (error) {
     console.error('[Auth] Error en login:', error.message);
-    res.status(500).json({ error: 'Error en el inicio de sesión' });
+    res.status(500).json({ error: 'Login error' });
   }
 });
 
@@ -200,7 +200,7 @@ router.post('/refresh', async (req, res) => {
     const { refreshToken } = req.body;
 
     if (!refreshToken) {
-      return res.status(400).json({ error: 'Refresh token requerido' });
+      return res.status(400).json({ error: 'Refresh token required' });
     }
 
     // Verificar el refresh token
@@ -208,26 +208,26 @@ router.post('/refresh', async (req, res) => {
     try {
       decoded = jwt.verify(refreshToken, JWT_SECRET);
     } catch {
-      return res.status(401).json({ error: 'Refresh token inválido o expirado' });
+      return res.status(401).json({ error: 'Invalid or expired refresh token' });
     }
 
     if (decoded.type !== 'refresh') {
-      return res.status(401).json({ error: 'Token inválido' });
+      return res.status(401).json({ error: 'Invalid token' });
     }
 
     const user = await User.findById(decoded.userId);
     if (!user || user.isDeleted) {
-      return res.status(401).json({ error: 'Usuario no encontrado' });
+      return res.status(401).json({ error: 'User not found' });
     }
 
     // Verificar que el refresh token coincide
     if (!user.refreshToken) {
-      return res.status(401).json({ error: 'Sesión invalidada' });
+      return res.status(401).json({ error: 'Session invalidated' });
     }
 
     const isValid = await bcrypt.compare(refreshToken, user.refreshToken);
     if (!isValid) {
-      return res.status(401).json({ error: 'Refresh token no coincide' });
+      return res.status(401).json({ error: 'Refresh token mismatch' });
     }
 
     // Generar nuevos tokens
@@ -243,7 +243,7 @@ router.post('/refresh', async (req, res) => {
     });
   } catch (error) {
     console.error('[Auth] Error en refresh:', error.message);
-    res.status(500).json({ error: 'Error renovando token' });
+    res.status(500).json({ error: 'Error refreshing token' });
   }
 });
 
@@ -252,10 +252,10 @@ router.post('/logout', verifyToken, async (req, res) => {
   try {
     req.user.refreshToken = null;
     await req.user.save();
-    res.json({ message: 'Sesión cerrada exitosamente' });
+    res.json({ message: 'Session closed successfully' });
   } catch (error) {
     console.error('[Auth] Error en logout:', error.message);
-    res.status(500).json({ error: 'Error cerrando sesión' });
+    res.status(500).json({ error: 'Error closing session' });
   }
 });
 
@@ -265,17 +265,17 @@ router.put('/password', verifyToken, async (req, res) => {
     const { currentPassword, newPassword } = req.body;
 
     if (!currentPassword || !newPassword) {
-      return res.status(400).json({ error: 'Contraseña actual y nueva son requeridas' });
+      return res.status(400).json({ error: 'Current and new password are required' });
     }
 
     if (newPassword.length < 8) {
-      return res.status(400).json({ error: 'La nueva contraseña debe tener mínimo 8 caracteres' });
+      return res.status(400).json({ error: 'New password must be at least 8 characters' });
     }
 
     // Verificar contraseña actual
     const isMatch = await bcrypt.compare(currentPassword, req.user.password);
     if (!isMatch) {
-      return res.status(401).json({ error: 'Contraseña actual incorrecta' });
+      return res.status(401).json({ error: 'Current password is incorrect' });
     }
 
     // Hash de la nueva contraseña
@@ -291,13 +291,13 @@ router.put('/password', verifyToken, async (req, res) => {
     await req.user.save();
 
     res.json({
-      message: 'Contraseña actualizada exitosamente',
+      message: 'Password updated successfully',
       token,
       refreshToken
     });
   } catch (error) {
     console.error('[Auth] Error cambiando contraseña:', error.message);
-    res.status(500).json({ error: 'Error cambiando contraseña' });
+    res.status(500).json({ error: 'Error changing password' });
   }
 });
 
@@ -313,11 +313,11 @@ router.delete('/account', verifyToken, async (req, res) => {
     await req.user.save();
 
     res.json({
-      message: 'Cuenta marcada para eliminación. Se eliminará permanentemente en 7 días.'
+      message: 'Account marked for deletion. It will be permanently deleted in 7 days.'
     });
   } catch (error) {
     console.error('[Auth] Error eliminando cuenta:', error.message);
-    res.status(500).json({ error: 'Error eliminando cuenta' });
+    res.status(500).json({ error: 'Error deleting account' });
   }
 });
 

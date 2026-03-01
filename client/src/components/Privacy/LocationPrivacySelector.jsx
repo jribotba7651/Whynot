@@ -1,17 +1,17 @@
-// Selector de privacidad de ubicación (Fase 6.1)
-// Permite al usuario elegir su radio de randomización
+// Location privacy selector (Phase 6.1)
+// Allows the user to choose their randomization radius
 const PRIVACY_OPTIONS = [
-  { value: 50, label: 'Precisa', desc: '50m — fácil de encontrar' },
-  { value: 500, label: 'Zona general', desc: '500m — recomendado' },
-  { value: 1000, label: 'Área amplia', desc: '1km — máximo anonimato' }
+  { value: 50, label: 'Precise', desc: '50m — easy to find' },
+  { value: 500, label: 'General area', desc: '500m — recommended' },
+  { value: 1000, label: 'Wide area', desc: '1km — maximum anonymity' }
 ];
 
 const LocationPrivacySelector = ({ value, onChange }) => {
   return (
     <div className="space-y-2">
-      <label className="block text-sm text-gray-400">Privacidad de ubicación</label>
+      <label className="block text-sm text-gray-400">Location privacy</label>
       <p className="text-xs text-gray-500 mb-3">
-        Otros usuarios verán tu pin con un offset aleatorio dentro de este radio
+        Other users will see your pin with a random offset within this radius
       </p>
       <div className="space-y-2">
         {PRIVACY_OPTIONS.map((opt) => (

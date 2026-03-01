@@ -1,17 +1,16 @@
-// Pantalla 2 del onboarding: "Busco..." (Fase 5.1)
-// Multi-select de qué tipo de conexiones busca el usuario
+// Onboarding screen 2: "Looking for..." (Phase 5.1)
+// Multi-select for what type of connections the user is looking for
 
 const SEEKING_OPTIONS = [
-  { value: 'men', label: 'Hombres', icon: '👤' },
-  { value: 'women', label: 'Mujeres', icon: '👤' },
-  { value: 'couples', label: 'Parejas', icon: '👫' },
-  { value: 'anyone', label: 'Todos', icon: '🌍' }
+  { value: 'men', label: 'Men', icon: '👤' },
+  { value: 'women', label: 'Women', icon: '👤' },
+  { value: 'couples', label: 'Couples', icon: '👫' },
+  { value: 'anyone', label: 'Everyone', icon: '🌍' }
 ];
 
 const SeekingSelector = ({ selected, onToggle }) => {
   const handleToggle = (value) => {
     if (value === 'anyone') {
-      // Si selecciona "Todos", auto-seleccionar todas las opciones
       if (selected.includes('anyone')) {
         onToggle([]);
       } else {
@@ -23,7 +22,6 @@ const SeekingSelector = ({ selected, onToggle }) => {
         newSelected = selected.filter(s => s !== value && s !== 'anyone');
       } else {
         newSelected = [...selected.filter(s => s !== 'anyone'), value];
-        // Si seleccionó las 3 individuales, auto-agregar "anyone"
         if (newSelected.includes('men') && newSelected.includes('women') && newSelected.includes('couples')) {
           newSelected.push('anyone');
         }
@@ -34,8 +32,8 @@ const SeekingSelector = ({ selected, onToggle }) => {
 
   return (
     <div className="flex flex-col items-center px-6 py-8">
-      <h1 className="text-2xl font-bold mb-2">Busco...</h1>
-      <p className="text-gray-400 text-sm mb-8">Puedes elegir varios</p>
+      <h1 className="text-2xl font-bold mb-2">Looking for...</h1>
+      <p className="text-gray-400 text-sm mb-8">You can choose multiple</p>
 
       <div className="flex flex-col gap-3 w-full max-w-sm">
         {SEEKING_OPTIONS.map((opt) => (

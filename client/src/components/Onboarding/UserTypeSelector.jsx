@@ -1,5 +1,5 @@
-// Pantalla 1 del onboarding: "Soy..." (Fase 5.1)
-// Selector visual de tipo de usuario con cards grandes
+// Onboarding screen 1: "I am..." (Phase 5.1)
+// Visual user type selector with large cards
 import { PIN_COLORS, USER_TYPE_LABELS } from '../../utils/pinColors';
 
 const USER_TYPE_OPTIONS = [
@@ -13,8 +13,8 @@ const USER_TYPE_OPTIONS = [
 const UserTypeSelector = ({ selected, onSelect }) => {
   return (
     <div className="flex flex-col items-center px-6 py-8">
-      <h1 className="text-2xl font-bold mb-2">Soy...</h1>
-      <p className="text-gray-400 text-sm mb-8">Selecciona cómo te identificas</p>
+      <h1 className="text-2xl font-bold mb-2">I am...</h1>
+      <p className="text-gray-400 text-sm mb-8">Select how you identify</p>
 
       <div className="grid grid-cols-2 gap-3 w-full max-w-sm">
         {USER_TYPE_OPTIONS.map((opt) => (

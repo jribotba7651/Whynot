@@ -52,7 +52,7 @@ router.get('/', verifyToken, async (req, res) => {
     res.json({ conversations: conversationsWithUnread });
   } catch (error) {
     console.error('[Chat] Error obteniendo conversaciones:', error.message);
-    res.status(500).json({ error: 'Error obteniendo conversaciones' });
+    res.status(500).json({ error: 'Error fetching conversations' });
   }
 });
 
@@ -70,7 +70,7 @@ router.get('/:id/messages', verifyToken, async (req, res) => {
     });
 
     if (!conversation) {
-      return res.status(404).json({ error: 'Conversación no encontrada' });
+      return res.status(404).json({ error: 'Conversation not found' });
     }
 
     // Query con paginación basada en cursor (createdAt del último mensaje visto)
@@ -103,7 +103,7 @@ router.get('/:id/messages', verifyToken, async (req, res) => {
     });
   } catch (error) {
     console.error('[Chat] Error obteniendo mensajes:', error.message);
-    res.status(500).json({ error: 'Error obteniendo mensajes' });
+    res.status(500).json({ error: 'Error fetching messages' });
   }
 });
 

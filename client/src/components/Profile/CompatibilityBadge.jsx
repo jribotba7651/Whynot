@@ -1,5 +1,5 @@
-// Badge de compatibilidad entre usuarios (Fase 5.4)
-// Muestra si hay match mutuo, interés unidireccional, o nada
+// Compatibility badge between users (Phase 5.4)
+// Shows if there's a mutual match, one-way interest, or nothing
 import { getCompatibility } from '../../utils/compatibility';
 
 const CompatibilityBadge = ({ currentUser, otherUser }) => {
@@ -21,7 +21,7 @@ const CompatibilityBadge = ({ currentUser, otherUser }) => {
   if (level === 'one-way') {
     return (
       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-yellow-500/15 text-yellow-300 text-xs">
-        Te podría interesar
+        Might interest you
       </span>
     );
   }

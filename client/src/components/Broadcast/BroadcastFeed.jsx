@@ -1,5 +1,5 @@
-// Panel lateral de broadcasts (Fase 6.4)
-// Muestra broadcasts activos y permite enviar nuevos
+// Broadcast side panel (Phase 6.4)
+// Shows active broadcasts and allows sending new ones
 import { useState, useEffect, useCallback } from 'react';
 import useSocket from '../../hooks/useSocket';
 import { useAuth } from '../../context/AuthContext';
@@ -13,7 +13,6 @@ const BroadcastFeed = ({ isOpen, onClose, location, vanillaMode }) => {
   const [broadcasts, setBroadcasts] = useState([]);
   const [lastSentAt, setLastSentAt] = useState(null);
 
-  // Cargar broadcasts existentes al abrir
   useEffect(() => {
     if (!isOpen || !location) return;
     getNearbyBroadcasts(location.latitude, location.longitude)
@@ -21,7 +20,6 @@ const BroadcastFeed = ({ isOpen, onClose, location, vanillaMode }) => {
       .catch(() => {});
   }, [isOpen, location]);
 
-  // Escuchar nuevos broadcasts por socket
   useEffect(() => {
     if (!socket) return;
 
@@ -36,7 +34,6 @@ const BroadcastFeed = ({ isOpen, onClose, location, vanillaMode }) => {
     socket.on('broadcast:new', onNewBroadcast);
     socket.on('broadcast:expired', onExpired);
 
-    // Registrar para broadcasts
     if (user?.id) {
       socket.emit('broadcast:register', { userId: user.id });
     }
@@ -47,7 +44,6 @@ const BroadcastFeed = ({ isOpen, onClose, location, vanillaMode }) => {
     };
   }, [socket, user?.id]);
 
-  // Limpiar broadcasts expirados localmente
   useEffect(() => {
     const interval = setInterval(() => {
       setBroadcasts(prev => prev.filter(b => new Date(b.expiresAt).getTime() > Date.now()));
@@ -65,12 +61,12 @@ const BroadcastFeed = ({ isOpen, onClose, location, vanillaMode }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex animate-slide-right">
-      {/* Panel lateral */}
+      {/* Side panel */}
       <div className="w-80 max-w-[85vw] bg-dark-300 h-full flex flex-col border-r border-dark-100 shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-dark-100">
-          <h3 className="font-semibold text-sm">Updates del área</h3>
-          <span className="text-xs text-gray-500">{broadcasts.length} activos</span>
+          <h3 className="font-semibold text-sm">Area updates</h3>
+          <span className="text-xs text-gray-500">{broadcasts.length} active</span>
         </div>
 
         {/* Input */}
@@ -86,7 +82,7 @@ const BroadcastFeed = ({ isOpen, onClose, location, vanillaMode }) => {
         <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2">
           {broadcasts.length === 0 ? (
             <p className="text-gray-500 text-sm text-center py-8">
-              No hay updates en tu área ahora mismo
+              No updates in your area right now
             </p>
           ) : (
             broadcasts.map((b) => (
@@ -96,7 +92,7 @@ const BroadcastFeed = ({ isOpen, onClose, location, vanillaMode }) => {
         </div>
       </div>
 
-      {/* Overlay para cerrar */}
+      {/* Overlay to close */}
       <div className="flex-1" onClick={onClose} />
     </div>
   );

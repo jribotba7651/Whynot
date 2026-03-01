@@ -11,7 +11,7 @@ const verifyToken = async (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Token de acceso requerido' });
+      return res.status(401).json({ error: 'Access token required' });
     }
 
     const token = authHeader.split(' ')[1];
@@ -22,7 +22,7 @@ const verifyToken = async (req, res, next) => {
       // Buscar usuario en la DB para confirmar que existe
       const user = await User.findById(decoded.userId);
       if (!user || user.isDeleted) {
-        return res.status(401).json({ error: 'Usuario no encontrado o eliminado' });
+        return res.status(401).json({ error: 'User not found or deleted' });
       }
 
       // Adjuntar usuario al request
@@ -31,13 +31,13 @@ const verifyToken = async (req, res, next) => {
       next();
     } catch (jwtError) {
       if (jwtError.name === 'TokenExpiredError') {
-        return res.status(401).json({ error: 'Token expirado', code: 'TOKEN_EXPIRED' });
+        return res.status(401).json({ error: 'Token expired', code: 'TOKEN_EXPIRED' });
       }
-      return res.status(401).json({ error: 'Token inválido' });
+      return res.status(401).json({ error: 'Invalid token' });
     }
   } catch (error) {
     console.error('[Auth] Error en middleware:', error.message);
-    return res.status(500).json({ error: 'Error interno de autenticación' });
+    return res.status(500).json({ error: 'Internal authentication error' });
   }
 };
 

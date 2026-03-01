@@ -27,7 +27,7 @@ const useGeolocation = () => {
     // Verificar soporte de geolocalización
     if (!navigator.geolocation) {
       setStatus('error');
-      setError('Tu navegador no soporta geolocalización');
+      setError('Your browser does not support geolocation');
       return;
     }
 
@@ -62,19 +62,19 @@ const useGeolocation = () => {
       switch (err.code) {
         case err.PERMISSION_DENIED:
           setStatus('permission-denied');
-          setError('Permiso de ubicación denegado. Activa la ubicación en la configuración de tu navegador.');
+          setError('Location permission denied. Enable location in your browser settings.');
           break;
         case err.POSITION_UNAVAILABLE:
           setStatus('error');
-          setError('No se pudo determinar tu ubicación. Verifica que el GPS esté activado.');
+          setError('Could not determine your location. Make sure GPS is enabled.');
           break;
         case err.TIMEOUT:
           setStatus('error');
-          setError('La solicitud de ubicación tardó demasiado. Intenta de nuevo.');
+          setError('Location request timed out. Please try again.');
           break;
         default:
           setStatus('error');
-          setError('Error desconocido obteniendo la ubicación.');
+          setError('Unknown error getting location.');
       }
     };
 
@@ -105,7 +105,7 @@ const useGeolocation = () => {
   return {
     location,       // { latitude, longitude, accuracy } o null
     status,         // 'loading' | 'success' | 'error' | 'permission-denied'
-    error,          // Mensaje de error en español o null
+    error,          // Error message or null
     onLocationChange, // Registrar callback para actualizaciones throttled
     forceEmit       // Forzar emisión inmediata
   };

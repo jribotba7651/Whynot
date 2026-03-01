@@ -1,5 +1,5 @@
-// Edición de perfil propio
-// Incluye: nombre, edad, bio, lookingFor, intereses, privacidad, Soy/Busco, radio de ubicación
+// Edit own profile
+// Includes: name, age, bio, lookingFor, interests, privacy, I am/Looking for, location radius
 import { useState, useEffect } from 'react';
 import { updateProfile } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
@@ -8,24 +8,24 @@ import LocationPrivacySelector from '../Privacy/LocationPrivacySelector';
 import { USER_TYPE_LABELS } from '../../utils/pinColors';
 
 const LOOKING_FOR_OPTIONS = [
-  { value: 'amistad', label: 'Amistad' },
-  { value: 'citas', label: 'Citas' },
+  { value: 'friendship', label: 'Friendship' },
+  { value: 'dating', label: 'Dating' },
   { value: 'networking', label: 'Networking' },
-  { value: 'lo-que-sea', label: 'Lo que sea' }
+  { value: 'whatever', label: 'Whatever' }
 ];
 
 const INTERESTS = [
-  'música', 'deportes', 'arte', 'tecnología', 'gastronomía',
-  'viajes', 'gaming', 'lectura', 'fitness', 'cine'
+  'music', 'sports', 'art', 'technology', 'food',
+  'travel', 'gaming', 'reading', 'fitness', 'movies'
 ];
 
 const USER_TYPE_OPTIONS = Object.entries(USER_TYPE_LABELS).map(([value, label]) => ({ value, label }));
 
 const SEEKING_OPTIONS = [
-  { value: 'men', label: 'Hombres' },
-  { value: 'women', label: 'Mujeres' },
-  { value: 'couples', label: 'Parejas' },
-  { value: 'anyone', label: 'Todos' }
+  { value: 'men', label: 'Men' },
+  { value: 'women', label: 'Women' },
+  { value: 'couples', label: 'Couples' },
+  { value: 'anyone', label: 'Everyone' }
 ];
 
 const ProfileEdit = ({ isOpen, onClose }) => {
@@ -34,7 +34,7 @@ const ProfileEdit = ({ isOpen, onClose }) => {
   const [displayName, setDisplayName] = useState('');
   const [age, setAge] = useState('');
   const [bio, setBio] = useState('');
-  const [lookingFor, setLookingFor] = useState('lo-que-sea');
+  const [lookingFor, setLookingFor] = useState('whatever');
   const [interests, setInterests] = useState([]);
   const [showAge, setShowAge] = useState(true);
   const [showDistance, setShowDistance] = useState(true);
@@ -50,7 +50,7 @@ const ProfileEdit = ({ isOpen, onClose }) => {
       setDisplayName(user.profile?.displayName || user.displayName || '');
       setAge(user.profile?.age?.toString() || '');
       setBio(user.profile?.bio || '');
-      setLookingFor(user.profile?.lookingFor || 'lo-que-sea');
+      setLookingFor(user.profile?.lookingFor || 'whatever');
       setInterests(user.profile?.interests || []);
       setShowAge(user.profile?.showAge !== false);
       setShowDistance(user.profile?.showDistance !== false);
@@ -106,7 +106,7 @@ const ProfileEdit = ({ isOpen, onClose }) => {
       setSuccess(true);
       setTimeout(() => setSuccess(false), 2000);
     } catch (err) {
-      setError(err.message || 'Error guardando perfil');
+      setError(err.message || 'Error saving profile');
     } finally {
       setSaving(false);
     }
@@ -119,11 +119,11 @@ const ProfileEdit = ({ isOpen, onClose }) => {
       <div className="flex-shrink-0 h-8 md:h-16" onClick={onClose} />
       <div className="flex-1 bg-dark-300 rounded-t-2xl overflow-y-auto">
         <div className="sticky top-0 bg-dark-300 border-b border-dark-100 px-4 py-3 flex items-center justify-between z-10">
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">Cancelar</button>
-          <h2 className="font-semibold">Editar perfil</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">Cancel</button>
+          <h2 className="font-semibold">Edit profile</h2>
           <button onClick={handleSave} disabled={saving}
             className="text-primary-400 font-medium hover:text-primary-300 transition-colors disabled:opacity-40">
-            {saving ? 'Guardando...' : 'Guardar'}
+            {saving ? 'Saving...' : 'Save'}
           </button>
         </div>
 
@@ -133,15 +133,15 @@ const ProfileEdit = ({ isOpen, onClose }) => {
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Nombre</label>
+            <label className="block text-sm text-gray-400 mb-1">Name</label>
             <input type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value.substring(0, 30))}
-              placeholder="Tu nombre"
+              placeholder="Your name"
               className="w-full bg-dark-200 border border-dark-100 rounded-xl px-4 py-3 text-white focus:border-primary-500 focus:outline-none" />
             <p className="text-xs text-gray-500 mt-1">{displayName.length}/30</p>
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Edad</label>
+            <label className="block text-sm text-gray-400 mb-1">Age</label>
             <input type="number" value={age} onChange={(e) => setAge(e.target.value)} min="18" max="99"
               className="w-full bg-dark-200 border border-dark-100 rounded-xl px-4 py-3 text-white focus:border-primary-500 focus:outline-none" />
           </div>
@@ -149,14 +149,14 @@ const ProfileEdit = ({ isOpen, onClose }) => {
           <div>
             <label className="block text-sm text-gray-400 mb-1">Bio</label>
             <textarea value={bio} onChange={(e) => setBio(e.target.value.substring(0, 200))}
-              placeholder="Cuéntanos sobre ti..." rows={3}
+              placeholder="Tell us about yourself..." rows={3}
               className="w-full bg-dark-200 border border-dark-100 rounded-xl px-4 py-3 text-white text-sm focus:border-primary-500 focus:outline-none resize-none" />
             <p className="text-xs text-gray-500 mt-1">{bio.length}/200</p>
           </div>
 
-          {/* Soy (Fase 5.1) */}
+          {/* I am (Phase 5.1) */}
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Soy...</label>
+            <label className="block text-sm text-gray-400 mb-2">I am...</label>
             <div className="flex flex-wrap gap-2">
               {USER_TYPE_OPTIONS.map((opt) => (
                 <button key={opt.value} onClick={() => setUserType(opt.value)}
@@ -168,9 +168,9 @@ const ProfileEdit = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          {/* Busco (Fase 5.1) */}
+          {/* Looking for (Phase 5.1) */}
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Busco...</label>
+            <label className="block text-sm text-gray-400 mb-2">Looking for...</label>
             <div className="flex flex-wrap gap-2">
               {SEEKING_OPTIONS.map((opt) => (
                 <button key={opt.value} onClick={() => toggleSeeking(opt.value)}
@@ -183,7 +183,7 @@ const ProfileEdit = ({ isOpen, onClose }) => {
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Tipo de conexión</label>
+            <label className="block text-sm text-gray-400 mb-2">Connection type</label>
             <div className="flex flex-wrap gap-2">
               {LOOKING_FOR_OPTIONS.map((opt) => (
                 <button key={opt.value} onClick={() => setLookingFor(opt.value)}
@@ -196,7 +196,7 @@ const ProfileEdit = ({ isOpen, onClose }) => {
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Intereses ({interests.length}/5)</label>
+            <label className="block text-sm text-gray-400 mb-2">Interests ({interests.length}/5)</label>
             <div className="flex flex-wrap gap-2">
               {INTERESTS.map((interest) => (
                 <button key={interest} onClick={() => toggleInterest(interest)}
@@ -209,16 +209,16 @@ const ProfileEdit = ({ isOpen, onClose }) => {
           </div>
 
           <div className="space-y-3">
-            <label className="block text-sm text-gray-400">Privacidad</label>
+            <label className="block text-sm text-gray-400">Privacy</label>
             <label className="flex items-center justify-between cursor-pointer">
-              <span className="text-sm">Mostrar mi edad</span>
+              <span className="text-sm">Show my age</span>
               <div onClick={() => setShowAge(!showAge)}
                 className={`w-11 h-6 rounded-full relative transition-colors cursor-pointer ${showAge ? 'bg-primary-600' : 'bg-dark-100'}`}>
                 <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${showAge ? 'translate-x-5' : 'translate-x-0.5'}`} />
               </div>
             </label>
             <label className="flex items-center justify-between cursor-pointer">
-              <span className="text-sm">Mostrar distancia</span>
+              <span className="text-sm">Show distance</span>
               <div onClick={() => setShowDistance(!showDistance)}
                 className={`w-11 h-6 rounded-full relative transition-colors cursor-pointer ${showDistance ? 'bg-primary-600' : 'bg-dark-100'}`}>
                 <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${showDistance ? 'translate-x-5' : 'translate-x-0.5'}`} />
@@ -229,7 +229,7 @@ const ProfileEdit = ({ isOpen, onClose }) => {
           <LocationPrivacySelector value={privacyRadius} onChange={setPrivacyRadius} />
 
           {error && <p className="text-red-400 text-sm">{error}</p>}
-          {success && <p className="text-green-400 text-sm">Perfil actualizado</p>}
+          {success && <p className="text-green-400 text-sm">Profile updated</p>}
           <div className="h-8" />
         </div>
       </div>

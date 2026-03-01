@@ -54,13 +54,13 @@ const userSchema = new mongoose.Schema({
     avatar: { type: String, default: null },
     lookingFor: {
       type: String,
-      enum: ['amistad', 'citas', 'networking', 'lo-que-sea'],
-      default: 'lo-que-sea'
+      enum: ['friendship', 'dating', 'networking', 'whatever'],
+      default: 'whatever'
     },
     interests: [{
       type: String,
-      enum: ['música', 'deportes', 'arte', 'tecnología', 'gastronomía',
-             'viajes', 'gaming', 'lectura', 'fitness', 'cine']
+      enum: ['music', 'sports', 'art', 'technology', 'food',
+             'travel', 'gaming', 'reading', 'fitness', 'movies']
     }],
     showAge: { type: Boolean, default: true },
     showDistance: { type: Boolean, default: true }

@@ -1,5 +1,5 @@
-// Botón de bloqueo de usuario (Fase 6.2)
-// Con confirmación antes de ejecutar
+// Block user button (Phase 6.2)
+// With confirmation before executing
 import { useState } from 'react';
 import { blockUser } from '../../services/api';
 
@@ -13,7 +13,7 @@ const BlockButton = ({ userId, userName, onBlocked, className = '' }) => {
       await blockUser(userId);
       onBlocked?.();
     } catch (err) {
-      console.error('Error bloqueando:', err.message);
+      console.error('Error blocking:', err.message);
     } finally {
       setBlocking(false);
       setConfirming(false);
@@ -24,21 +24,21 @@ const BlockButton = ({ userId, userName, onBlocked, className = '' }) => {
     return (
       <div className={`bg-red-900/20 border border-red-800/50 rounded-xl p-3 ${className}`}>
         <p className="text-red-300 text-xs mb-2">
-          ¿Bloquear a {userName || 'este usuario'}? Ya no podrá verte ni contactarte.
+          Block {userName || 'this user'}? They won't be able to see or contact you.
         </p>
         <div className="flex gap-2">
           <button
             onClick={() => setConfirming(false)}
             className="flex-1 py-1.5 bg-dark-200 rounded-lg text-xs"
           >
-            Cancelar
+            Cancel
           </button>
           <button
             onClick={handleBlock}
             disabled={blocking}
             className="flex-1 py-1.5 bg-red-600 text-white rounded-lg text-xs disabled:opacity-40"
           >
-            {blocking ? '...' : 'Bloquear'}
+            {blocking ? '...' : 'Block'}
           </button>
         </div>
       </div>
@@ -50,7 +50,7 @@ const BlockButton = ({ userId, userName, onBlocked, className = '' }) => {
       onClick={() => setConfirming(true)}
       className={`text-red-400 text-xs hover:text-red-300 transition-colors ${className}`}
     >
-      Bloquear usuario
+      Block user
     </button>
   );
 };

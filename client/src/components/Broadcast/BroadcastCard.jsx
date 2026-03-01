@@ -1,4 +1,4 @@
-// Card individual de broadcast (Fase 6.4)
+// Individual broadcast card (Phase 6.4)
 import { useState, useEffect } from 'react';
 import { getPinColor } from '../../utils/pinColors';
 
@@ -9,7 +9,7 @@ const BroadcastCard = ({ broadcast, vanillaMode }) => {
     const update = () => {
       const remaining = new Date(broadcast.expiresAt).getTime() - Date.now();
       if (remaining <= 0) {
-        setTimeLeft('Expirado');
+        setTimeLeft('Expired');
         return;
       }
       const minutes = Math.floor(remaining / 60000);

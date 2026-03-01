@@ -23,7 +23,7 @@ const broadcastHandler = (io, socket) => {
       const { userId, message } = data;
 
       if (!userId || !message) {
-        return socket.emit('broadcast:error', { code: 'INVALID', message: 'Datos incompletos' });
+        return socket.emit('broadcast:error', { code: 'INVALID', message: 'Incomplete data' });
       }
 
       // Verificar que el usuario es registrado
@@ -31,14 +31,14 @@ const broadcastHandler = (io, socket) => {
       if (!user || user.accountType !== 'registered') {
         return socket.emit('broadcast:error', {
           code: 'NOT_REGISTERED',
-          message: 'Crea una cuenta para enviar updates'
+          message: 'Create an account to send updates'
         });
       }
 
       if (message.length > 140) {
         return socket.emit('broadcast:error', {
           code: 'TOO_LONG',
-          message: 'El mensaje no puede tener más de 140 caracteres'
+          message: 'Message cannot exceed 140 characters'
         });
       }
 
@@ -48,7 +48,7 @@ const broadcastHandler = (io, socket) => {
       if (recent) {
         return socket.emit('broadcast:error', {
           code: 'RATE_LIMITED',
-          message: 'Puedes enviar un broadcast cada 30 minutos'
+          message: 'You can send one broadcast every 30 minutes'
         });
       }
 
@@ -56,7 +56,7 @@ const broadcastHandler = (io, socket) => {
       if (!user.location?.coordinates?.[0]) {
         return socket.emit('broadcast:error', {
           code: 'NO_LOCATION',
-          message: 'Necesitas activar la ubicación'
+          message: 'You need to enable location'
         });
       }
 
@@ -106,7 +106,7 @@ const broadcastHandler = (io, socket) => {
 
     } catch (error) {
       console.error('[Socket:Broadcast] Error enviando broadcast:', error.message);
-      socket.emit('broadcast:error', { code: 'SERVER_ERROR', message: 'Error enviando broadcast' });
+      socket.emit('broadcast:error', { code: 'SERVER_ERROR', message: 'Error sending broadcast' });
     }
   });
 

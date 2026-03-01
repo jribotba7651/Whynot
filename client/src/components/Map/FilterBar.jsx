@@ -1,15 +1,14 @@
-// Barra de filtros de mapa (Fase 5.3)
-// Chips toggleables para filtrar qué tipos de usuarios ver
+// Map filter bar (Phase 5.3)
+// Toggleable chips to filter which user types to see
 import { useState, useEffect } from 'react';
 
 const FILTERS = [
-  { key: 'men', label: 'Hombres', types: ['man'] },
-  { key: 'women', label: 'Mujeres', types: ['woman'] },
-  { key: 'couples', label: 'Parejas', types: ['couple_mf', 'couple_mm', 'couple_ff'] }
+  { key: 'men', label: 'Men', types: ['man'] },
+  { key: 'women', label: 'Women', types: ['woman'] },
+  { key: 'couples', label: 'Couples', types: ['couple_mf', 'couple_mm', 'couple_ff'] }
 ];
 
 const FilterBar = ({ seekingTypes, onFilterChange }) => {
-  // Derivar estado inicial de seekingTypes del usuario
   const [activeFilters, setActiveFilters] = useState(() => {
     const saved = localStorage.getItem('whynot_filters');
     if (saved) return JSON.parse(saved);
@@ -23,7 +22,6 @@ const FilterBar = ({ seekingTypes, onFilterChange }) => {
 
   useEffect(() => {
     localStorage.setItem('whynot_filters', JSON.stringify(activeFilters));
-    // Construir set de userTypes visibles a partir de filtros activos
     const visibleTypes = new Set();
     activeFilters.forEach(filter => {
       const f = FILTERS.find(ff => ff.key === filter);

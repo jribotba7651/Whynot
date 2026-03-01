@@ -1,5 +1,5 @@
-// Mini-preview al tocar un pin (Fase 5.2)
-// Muestra info compacta con badge de compatibilidad
+// Mini-preview when tapping a pin (Phase 5.2)
+// Shows compact info with compatibility badge
 import Avatar from '../UI/Avatar';
 import CompatibilityBadge from '../Profile/CompatibilityBadge';
 import VibeCounter from '../Profile/VibeCounter';
@@ -21,11 +21,11 @@ const PinPreview = ({ user, currentUser, onViewProfile, onClose, vanillaMode }) 
             />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-medium text-sm truncate">{user.displayName || 'Usuario'}</p>
+            <p className="font-medium text-sm truncate">{user.displayName || 'User'}</p>
             <p className="text-xs text-gray-400">
-              {USER_TYPE_LABELS[user.userType] || 'Sin tipo'}
+              {USER_TYPE_LABELS[user.userType] || 'No type'}
               {user.seekingTypes?.length > 0 && (
-                <span> · Busca: {formatSeeking(user.seekingTypes)}</span>
+                <span> · Looking for: {formatSeeking(user.seekingTypes)}</span>
               )}
             </p>
           </div>
@@ -45,13 +45,13 @@ const PinPreview = ({ user, currentUser, onViewProfile, onClose, vanillaMode }) 
           <VibeCounter count={user.vibeCount} />
         </div>
 
-        {/* Botón ver perfil */}
+        {/* View profile button */}
         <button
           onClick={() => onViewProfile(user)}
           className="w-full mt-2 py-2 bg-primary-600/80 rounded-xl text-xs font-medium
                      hover:bg-primary-700 transition-colors"
         >
-          Ver perfil
+          View profile
         </button>
       </div>
     </div>

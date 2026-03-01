@@ -1,23 +1,23 @@
-// Wizard de configuración de perfil (3 pasos)
-// Paso 1: Nombre y edad
-// Paso 2: ¿Qué buscas? (lookingFor)
-// Paso 3: Intereses (máximo 5)
+// Profile setup wizard (3 steps)
+// Step 1: Name and age
+// Step 2: What are you looking for? (lookingFor)
+// Step 3: Interests (max 5)
 import { useState } from 'react';
 import { updateProfile } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 
-// Opciones de "qué buscas" con iconos
+// "Looking for" options with icons
 const LOOKING_FOR_OPTIONS = [
-  { value: 'amistad', label: 'Amistad', icon: '👥', color: 'border-blue-500 bg-blue-500/10' },
-  { value: 'citas', label: 'Citas', icon: '💝', color: 'border-pink-500 bg-pink-500/10' },
+  { value: 'friendship', label: 'Friendship', icon: '👥', color: 'border-blue-500 bg-blue-500/10' },
+  { value: 'dating', label: 'Dating', icon: '💝', color: 'border-pink-500 bg-pink-500/10' },
   { value: 'networking', label: 'Networking', icon: '💼', color: 'border-green-500 bg-green-500/10' },
-  { value: 'lo-que-sea', label: 'Lo que sea', icon: '✨', color: 'border-gray-500 bg-gray-500/10' }
+  { value: 'whatever', label: 'Whatever', icon: '✨', color: 'border-gray-500 bg-gray-500/10' }
 ];
 
-// Opciones de intereses
+// Interest options
 const INTERESTS = [
-  'música', 'deportes', 'arte', 'tecnología', 'gastronomía',
-  'viajes', 'gaming', 'lectura', 'fitness', 'cine'
+  'music', 'sports', 'art', 'technology', 'food',
+  'travel', 'gaming', 'reading', 'fitness', 'movies'
 ];
 
 const ProfileSetup = ({ isOpen, onClose, onComplete }) => {
@@ -27,24 +27,21 @@ const ProfileSetup = ({ isOpen, onClose, onComplete }) => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  // Datos del formulario
   const [displayName, setDisplayName] = useState('');
   const [age, setAge] = useState('');
-  const [lookingFor, setLookingFor] = useState('lo-que-sea');
+  const [lookingFor, setLookingFor] = useState('whatever');
   const [interests, setInterests] = useState([]);
   const [bio, setBio] = useState('');
 
-  // Validar paso actual
   const isStepValid = () => {
     switch (step) {
       case 1: return displayName.trim().length >= 2 && age >= 18 && age <= 99;
-      case 2: return true; // lookingFor siempre tiene valor por defecto
-      case 3: return true; // Intereses son opcionales
+      case 2: return true;
+      case 3: return true;
       default: return false;
     }
   };
 
-  // Guardar perfil en el servidor
   const saveProfile = async () => {
     setSaving(true);
     setError('');
@@ -60,7 +57,6 @@ const ProfileSetup = ({ isOpen, onClose, onComplete }) => {
 
       const result = await updateProfile(profileData);
 
-      // Actualizar contexto de auth
       updateUser({
         displayName: displayName.trim(),
         profile: result.profile,
@@ -70,24 +66,22 @@ const ProfileSetup = ({ isOpen, onClose, onComplete }) => {
       onComplete?.();
       onClose();
     } catch (err) {
-      setError(err.message || 'Error guardando perfil');
+      setError(err.message || 'Error saving profile');
     } finally {
       setSaving(false);
     }
   };
 
-  // Toggle un interés
   const toggleInterest = (interest) => {
     setInterests(prev => {
       if (prev.includes(interest)) {
         return prev.filter(i => i !== interest);
       }
-      if (prev.length >= 5) return prev; // Máximo 5
+      if (prev.length >= 5) return prev;
       return [...prev, interest];
     });
   };
 
-  // Siguiente paso
   const nextStep = () => {
     if (step < 3) {
       setStep(step + 1);
@@ -101,7 +95,7 @@ const ProfileSetup = ({ isOpen, onClose, onComplete }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50 animate-fade-in">
       <div className="w-full max-w-md bg-dark-300 rounded-t-2xl md:rounded-2xl p-6 animate-slide-up">
-        {/* Barra de progreso */}
+        {/* Progress bar */}
         <div className="flex gap-1 mb-6">
           {[1, 2, 3].map((s) => (
             <div
@@ -113,22 +107,22 @@ const ProfileSetup = ({ isOpen, onClose, onComplete }) => {
           ))}
         </div>
 
-        {/* Paso 1: Nombre y edad */}
+        {/* Step 1: Name and age */}
         {step === 1 && (
           <div className="animate-slide-right">
-            <h2 className="text-xl font-bold mb-2">¿Cómo te llamas?</h2>
+            <h2 className="text-xl font-bold mb-2">What's your name?</h2>
             <p className="text-gray-400 text-sm mb-6">
-              Así te verán otros usuarios cercanos
+              This is how nearby users will see you
             </p>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Nombre</label>
+                <label className="block text-sm text-gray-400 mb-1">Name</label>
                 <input
                   type="text"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value.substring(0, 30))}
-                  placeholder="Tu nombre o apodo"
+                  placeholder="Your name or nickname"
                   className="w-full bg-dark-200 border border-dark-100 rounded-xl px-4 py-3 text-white
                              focus:border-primary-500 focus:outline-none placeholder-gray-600"
                   autoFocus
@@ -137,7 +131,7 @@ const ProfileSetup = ({ isOpen, onClose, onComplete }) => {
               </div>
 
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Edad</label>
+                <label className="block text-sm text-gray-400 mb-1">Age</label>
                 <input
                   type="number"
                   value={age}
@@ -149,19 +143,19 @@ const ProfileSetup = ({ isOpen, onClose, onComplete }) => {
                              focus:border-primary-500 focus:outline-none placeholder-gray-600"
                 />
                 {age && (age < 18 || age > 99) && (
-                  <p className="text-xs text-red-400 mt-1">La edad debe estar entre 18 y 99</p>
+                  <p className="text-xs text-red-400 mt-1">Age must be between 18 and 99</p>
                 )}
               </div>
             </div>
           </div>
         )}
 
-        {/* Paso 2: ¿Qué buscas? */}
+        {/* Step 2: What are you looking for? */}
         {step === 2 && (
           <div className="animate-slide-right">
-            <h2 className="text-xl font-bold mb-2">¿Qué buscas?</h2>
+            <h2 className="text-xl font-bold mb-2">What are you looking for?</h2>
             <p className="text-gray-400 text-sm mb-6">
-              Esto ayuda a otros a saber qué esperar
+              This helps others know what to expect
             </p>
 
             <div className="grid grid-cols-2 gap-3">
@@ -183,12 +177,12 @@ const ProfileSetup = ({ isOpen, onClose, onComplete }) => {
           </div>
         )}
 
-        {/* Paso 3: Intereses */}
+        {/* Step 3: Interests */}
         {step === 3 && (
           <div className="animate-slide-right">
-            <h2 className="text-xl font-bold mb-2">Tus intereses</h2>
+            <h2 className="text-xl font-bold mb-2">Your interests</h2>
             <p className="text-gray-400 text-sm mb-4">
-              Selecciona hasta 5 intereses ({interests.length}/5)
+              Select up to 5 interests ({interests.length}/5)
             </p>
 
             <div className="flex flex-wrap gap-2 mb-4">
@@ -207,13 +201,13 @@ const ProfileSetup = ({ isOpen, onClose, onComplete }) => {
               ))}
             </div>
 
-            {/* Bio opcional */}
+            {/* Optional bio */}
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Bio (opcional)</label>
+              <label className="block text-sm text-gray-400 mb-1">Bio (optional)</label>
               <textarea
                 value={bio}
                 onChange={(e) => setBio(e.target.value.substring(0, 200))}
-                placeholder="Cuéntanos algo sobre ti..."
+                placeholder="Tell us something about yourself..."
                 rows={3}
                 className="w-full bg-dark-200 border border-dark-100 rounded-xl px-4 py-3 text-white text-sm
                            focus:border-primary-500 focus:outline-none placeholder-gray-600 resize-none"
@@ -228,14 +222,14 @@ const ProfileSetup = ({ isOpen, onClose, onComplete }) => {
           <p className="text-red-400 text-sm mt-3">{error}</p>
         )}
 
-        {/* Botones de navegación */}
+        {/* Navigation buttons */}
         <div className="flex gap-3 mt-6">
           {step > 1 && (
             <button
               onClick={() => setStep(step - 1)}
               className="flex-1 py-3 rounded-xl bg-dark-200 text-gray-300 hover:bg-dark-100 transition-colors"
             >
-              Atrás
+              Back
             </button>
           )}
 
@@ -243,7 +237,7 @@ const ProfileSetup = ({ isOpen, onClose, onComplete }) => {
             onClick={onClose}
             className="py-3 px-4 rounded-xl text-gray-500 hover:text-gray-300 transition-colors"
           >
-            Omitir
+            Skip
           </button>
 
           <button
@@ -253,7 +247,7 @@ const ProfileSetup = ({ isOpen, onClose, onComplete }) => {
                        hover:bg-primary-700 transition-colors
                        disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            {saving ? 'Guardando...' : step === 3 ? 'Completar' : 'Siguiente'}
+            {saving ? 'Saving...' : step === 3 ? 'Complete' : 'Next'}
           </button>
         </div>
       </div>

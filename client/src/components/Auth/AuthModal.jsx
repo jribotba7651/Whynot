@@ -1,20 +1,19 @@
-// Modal de autenticación (Fase 4)
-// Tabs: "Crear cuenta" / "Iniciar sesión"
-// Validación en tiempo real de email, contraseña y confirmación
+// Authentication modal (Phase 4)
+// Tabs: "Create account" / "Log in"
+// Real-time validation for email, password, and confirmation
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 
 const AuthModal = ({ isOpen, onClose }) => {
   const { register, login, error: authError } = useAuth();
 
-  const [tab, setTab] = useState('register'); // register | login
+  const [tab, setTab] = useState('register');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Validaciones en tiempo real
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const isPasswordValid = password.length >= 8;
   const doPasswordsMatch = password === confirmPassword;
@@ -23,7 +22,6 @@ const AuthModal = ({ isOpen, onClose }) => {
     ? isEmailValid && isPasswordValid
     : isEmailValid && isPasswordValid && doPasswordsMatch;
 
-  // Enviar formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isFormValid) return;
@@ -42,10 +40,10 @@ const AuthModal = ({ isOpen, onClose }) => {
       if (result.success) {
         onClose();
       } else {
-        setError(result.error || 'Error de autenticación');
+        setError(result.error || 'Authentication error');
       }
     } catch (err) {
-      setError(err.message || 'Error inesperado');
+      setError(err.message || 'Unexpected error');
     } finally {
       setLoading(false);
     }
@@ -66,7 +64,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                 : 'text-gray-500 hover:text-gray-300'
             }`}
           >
-            Crear cuenta
+            Create account
           </button>
           <button
             onClick={() => { setTab('login'); setError(''); }}
@@ -76,18 +74,18 @@ const AuthModal = ({ isOpen, onClose }) => {
                 : 'text-gray-500 hover:text-gray-300'
             }`}
           >
-            Iniciar sesión
+            Log in
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
-          {/* Beneficios (solo en registro) */}
+          {/* Benefits (register only) */}
           {tab === 'register' && (
             <div className="bg-dark-200 rounded-xl p-3 text-xs text-gray-400 space-y-1">
-              <p className="text-gray-300 font-medium text-sm mb-1">¿Por qué crear cuenta?</p>
-              <p>• Tus conversaciones se guardan permanentemente</p>
-              <p>• Accede desde cualquier dispositivo</p>
-              <p>• Tu perfil se mantiene siempre</p>
+              <p className="text-gray-300 font-medium text-sm mb-1">Why create an account?</p>
+              <p>• Your conversations are saved permanently</p>
+              <p>• Access from any device</p>
+              <p>• Your profile stays forever</p>
             </div>
           )}
 
@@ -98,7 +96,7 @@ const AuthModal = ({ isOpen, onClose }) => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="tu@email.com"
+              placeholder="you@email.com"
               className={`w-full bg-dark-200 border rounded-xl px-4 py-3 text-white
                          focus:outline-none placeholder-gray-600 ${
                 email && !isEmailValid ? 'border-red-500' : 'border-dark-100 focus:border-primary-500'
@@ -106,44 +104,44 @@ const AuthModal = ({ isOpen, onClose }) => {
               autoFocus
             />
             {email && !isEmailValid && (
-              <p className="text-xs text-red-400 mt-1">Formato de email inválido</p>
+              <p className="text-xs text-red-400 mt-1">Invalid email format</p>
             )}
           </div>
 
-          {/* Contraseña */}
+          {/* Password */}
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Contraseña</label>
+            <label className="block text-sm text-gray-400 mb-1">Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Mínimo 8 caracteres"
+              placeholder="Minimum 8 characters"
               className={`w-full bg-dark-200 border rounded-xl px-4 py-3 text-white
                          focus:outline-none placeholder-gray-600 ${
                 password && !isPasswordValid ? 'border-red-500' : 'border-dark-100 focus:border-primary-500'
               }`}
             />
             {password && !isPasswordValid && (
-              <p className="text-xs text-red-400 mt-1">La contraseña debe tener mínimo 8 caracteres</p>
+              <p className="text-xs text-red-400 mt-1">Password must be at least 8 characters</p>
             )}
           </div>
 
-          {/* Confirmar contraseña (solo registro) */}
+          {/* Confirm password (register only) */}
           {tab === 'register' && (
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Confirmar contraseña</label>
+              <label className="block text-sm text-gray-400 mb-1">Confirm password</label>
               <input
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Repite la contraseña"
+                placeholder="Repeat your password"
                 className={`w-full bg-dark-200 border rounded-xl px-4 py-3 text-white
                            focus:outline-none placeholder-gray-600 ${
                   confirmPassword && !doPasswordsMatch ? 'border-red-500' : 'border-dark-100 focus:border-primary-500'
                 }`}
               />
               {confirmPassword && !doPasswordsMatch && (
-                <p className="text-xs text-red-400 mt-1">Las contraseñas no coinciden</p>
+                <p className="text-xs text-red-400 mt-1">Passwords don't match</p>
               )}
             </div>
           )}
@@ -153,7 +151,7 @@ const AuthModal = ({ isOpen, onClose }) => {
             <p className="text-red-400 text-sm">{error || authError}</p>
           )}
 
-          {/* Botón de enviar */}
+          {/* Submit button */}
           <button
             type="submit"
             disabled={!isFormValid || loading}
@@ -162,18 +160,18 @@ const AuthModal = ({ isOpen, onClose }) => {
                        disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {loading
-              ? 'Procesando...'
-              : tab === 'register' ? 'Crear cuenta' : 'Iniciar sesión'
+              ? 'Processing...'
+              : tab === 'register' ? 'Create account' : 'Log in'
             }
           </button>
 
-          {/* Continuar sin cuenta */}
+          {/* Continue without account */}
           <button
             type="button"
             onClick={onClose}
             className="w-full py-2 text-gray-500 text-sm hover:text-gray-300 transition-colors"
           >
-            Continuar sin cuenta
+            Continue without account
           </button>
         </form>
       </div>

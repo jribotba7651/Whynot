@@ -1,14 +1,14 @@
-// Modal de reporte de usuario (Fase 6.2)
-// Permite seleccionar razón y enviar detalles opcionales
+// User report modal (Phase 6.2)
+// Allows selecting a reason and sending optional details
 import { useState } from 'react';
 import { reportUser } from '../../services/api';
 
 const REASONS = [
-  { value: 'contenido_inapropiado', label: 'Contenido inapropiado' },
-  { value: 'acoso', label: 'Acoso o comportamiento abusivo' },
-  { value: 'perfil_falso', label: 'Perfil falso' },
-  { value: 'menor_de_edad', label: 'Sospecha de menor de edad' },
-  { value: 'otro', label: 'Otro motivo' }
+  { value: 'inappropriate_content', label: 'Inappropriate content' },
+  { value: 'harassment', label: 'Harassment or abusive behavior' },
+  { value: 'fake_profile', label: 'Fake profile' },
+  { value: 'underage', label: 'Suspected underage user' },
+  { value: 'other', label: 'Other reason' }
 ];
 
 const ReportModal = ({ isOpen, onClose, userId }) => {
@@ -47,21 +47,21 @@ const ReportModal = ({ isOpen, onClose, userId }) => {
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 animate-fade-in px-4">
       <div className="bg-dark-300 rounded-2xl w-full max-w-sm overflow-hidden">
         <div className="px-5 py-4 border-b border-dark-100">
-          <h3 className="font-semibold text-center">Reportar usuario</h3>
+          <h3 className="font-semibold text-center">Report user</h3>
         </div>
 
         {sent ? (
           <div className="px-5 py-8 text-center">
             <div className="text-3xl mb-3">✓</div>
-            <p className="text-green-400 font-medium">Reporte enviado</p>
-            <p className="text-gray-400 text-sm mt-2">Gracias por ayudarnos a mantener la comunidad segura.</p>
+            <p className="text-green-400 font-medium">Report sent</p>
+            <p className="text-gray-400 text-sm mt-2">Thank you for helping us keep the community safe.</p>
             <button onClick={handleClose} className="mt-5 px-6 py-2 bg-dark-200 rounded-xl text-sm">
-              Cerrar
+              Close
             </button>
           </div>
         ) : (
           <div className="px-5 py-4 space-y-3">
-            <p className="text-gray-400 text-sm">Selecciona el motivo del reporte:</p>
+            <p className="text-gray-400 text-sm">Select the reason for reporting:</p>
 
             {REASONS.map((r) => (
               <button
@@ -77,11 +77,11 @@ const ReportModal = ({ isOpen, onClose, userId }) => {
               </button>
             ))}
 
-            {reason === 'otro' && (
+            {reason === 'other' && (
               <textarea
                 value={details}
                 onChange={(e) => setDetails(e.target.value.substring(0, 500))}
-                placeholder="Describe el problema..."
+                placeholder="Describe the problem..."
                 rows={3}
                 className="w-full bg-dark-200 border border-dark-100 rounded-xl px-4 py-3 text-white text-sm
                            focus:border-red-500 focus:outline-none resize-none"
@@ -92,14 +92,14 @@ const ReportModal = ({ isOpen, onClose, userId }) => {
 
             <div className="flex gap-2 pt-2">
               <button onClick={handleClose} className="flex-1 py-3 bg-dark-200 rounded-xl text-sm">
-                Cancelar
+                Cancel
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={!reason || sending}
                 className="flex-1 py-3 bg-red-600 text-white rounded-xl text-sm disabled:opacity-40"
               >
-                {sending ? 'Enviando...' : 'Enviar reporte'}
+                {sending ? 'Sending...' : 'Send report'}
               </button>
             </div>
           </div>

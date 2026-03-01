@@ -1,5 +1,5 @@
-// Drawer de chat (bottom sheet en móvil)
-// Integra: modo discreto con blur, reportar/bloquear, vibes
+// Chat drawer (bottom sheet on mobile)
+// Integrates: discrete mode with blur, report/block, vibes
 import { useState, useEffect, useRef, useCallback } from 'react';
 import BlurredMessage from './BlurredMessage';
 import VibeButton from '../Profile/VibeButton';
@@ -8,7 +8,7 @@ import BlockButton from '../Safety/BlockButton';
 
 const formatTime = (dateStr) => {
   const date = new Date(dateStr);
-  return date.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+  return date.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' });
 };
 
 const getDateLabel = (dateStr) => {
@@ -16,9 +16,9 @@ const getDateLabel = (dateStr) => {
   const today = new Date();
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
-  if (date.toDateString() === today.toDateString()) return 'Hoy';
-  if (date.toDateString() === yesterday.toDateString()) return 'Ayer';
-  return date.toLocaleDateString('es', { day: 'numeric', month: 'long' });
+  if (date.toDateString() === today.toDateString()) return 'Today';
+  if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
+  return date.toLocaleDateString('en', { day: 'numeric', month: 'long' });
 };
 
 const ChatDrawer = ({
@@ -83,9 +83,9 @@ const ChatDrawer = ({
                 {targetUser?.displayName?.[0]?.toUpperCase() || '?'}
               </div>
               <div>
-                <p className="font-medium text-sm">{targetUser?.displayName || 'Usuario'}</p>
+                <p className="font-medium text-sm">{targetUser?.displayName || 'User'}</p>
                 <p className="text-xs text-gray-400">
-                  {targetUser?.isOnline ? <span className="text-green-400">En línea</span> : 'Desconectado'}
+                  {targetUser?.isOnline ? <span className="text-green-400">Online</span> : 'Offline'}
                 </p>
               </div>
             </div>
@@ -110,7 +110,7 @@ const ChatDrawer = ({
               <div className="absolute top-14 right-4 bg-dark-200 border border-dark-100 rounded-xl shadow-xl overflow-hidden min-w-[160px] z-10 animate-fade-in">
                 <button onClick={() => { setShowOptions(false); setShowReport(true); }}
                   className="w-full px-4 py-3 text-left text-sm hover:bg-dark-100 transition-colors text-yellow-400">
-                  Reportar
+                  Report
                 </button>
                 <div className="px-4 py-3 hover:bg-dark-100 transition-colors">
                   <BlockButton userId={targetUser?.id} userName={targetUser?.displayName} onBlocked={onClose} />
@@ -119,12 +119,12 @@ const ChatDrawer = ({
             )}
           </div>
 
-          {/* Mensajes */}
+          {/* Messages */}
           <div ref={messagesContainerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
-            {loadingMore && <div className="text-center text-gray-500 text-xs py-2">Cargando mensajes anteriores...</div>}
+            {loadingMore && <div className="text-center text-gray-500 text-xs py-2">Loading previous messages...</div>}
             {messages.length === 0 && (
               <div className="flex items-center justify-center h-full">
-                <p className="text-gray-500 text-sm text-center">No hay mensajes aún.<br />¡Envía el primero!</p>
+                <p className="text-gray-500 text-sm text-center">No messages yet.<br />Send the first one!</p>
               </div>
             )}
 
@@ -158,7 +158,7 @@ const ChatDrawer = ({
             {isTyping && (
               <div className="flex justify-start">
                 <div className="bg-dark-100 px-3 py-2 rounded-2xl rounded-bl-md text-sm text-gray-400">
-                  <span className="animate-pulse">Escribiendo...</span>
+                  <span className="animate-pulse">Typing...</span>
                 </div>
               </div>
             )}
@@ -169,7 +169,7 @@ const ChatDrawer = ({
           <div className="flex items-end gap-2 px-4 py-3 border-t border-dark-100">
             <div className="flex-1 relative">
               <textarea value={text} onChange={handleTextChange} onKeyDown={handleKeyDown}
-                placeholder="Escribe un mensaje..." rows={1} maxLength={500}
+                placeholder="Type a message..." rows={1} maxLength={500}
                 className="w-full bg-dark-200 text-white px-4 py-2 rounded-2xl text-sm resize-none
                            border border-dark-100 focus:border-primary-500 focus:outline-none placeholder-gray-500 max-h-24"
                 style={{ minHeight: '40px' }} />

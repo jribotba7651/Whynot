@@ -12,7 +12,7 @@ router.get('/nearby', verifyToken, async (req, res) => {
   try {
     const { lat, lon } = req.query;
     if (!lat || !lon) {
-      return res.status(400).json({ error: 'Coordenadas requeridas' });
+      return res.status(400).json({ error: 'Coordinates required' });
     }
 
     const broadcasts = await Broadcast.find({
@@ -37,7 +37,7 @@ router.get('/nearby', verifyToken, async (req, res) => {
     });
   } catch (error) {
     console.error('[Broadcasts] Error obteniendo broadcasts:', error.message);
-    res.status(500).json({ error: 'Error obteniendo broadcasts' });
+    res.status(500).json({ error: 'Error fetching broadcasts' });
   }
 });
 
@@ -47,19 +47,19 @@ router.post('/', verifyToken, async (req, res) => {
     const user = req.user;
 
     if (user.accountType !== 'registered') {
-      return res.status(403).json({ error: 'Crea una cuenta para enviar updates', code: 'NOT_REGISTERED' });
+      return res.status(403).json({ error: 'Create an account to send updates', code: 'NOT_REGISTERED' });
     }
 
     const { message } = req.body;
     if (!message || message.length > 140) {
-      return res.status(400).json({ error: 'El mensaje debe tener entre 1 y 140 caracteres', code: 'TOO_LONG' });
+      return res.status(400).json({ error: 'Message must be between 1 and 140 characters', code: 'TOO_LONG' });
     }
 
     // Rate limit: 1 broadcast cada 30 minutos
     const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000);
     const recent = await Broadcast.findOne({ userId: user._id, createdAt: { $gte: thirtyMinAgo } });
     if (recent) {
-      return res.status(429).json({ error: 'Puedes enviar un broadcast cada 30 minutos', code: 'RATE_LIMITED' });
+      return res.status(429).json({ error: 'You can send one broadcast every 30 minutes', code: 'RATE_LIMITED' });
     }
 
     const broadcast = await Broadcast.create({
@@ -77,7 +77,7 @@ router.post('/', verifyToken, async (req, res) => {
     });
   } catch (error) {
     console.error('[Broadcasts] Error creando broadcast:', error.message);
-    res.status(500).json({ error: 'Error creando broadcast' });
+    res.status(500).json({ error: 'Error creating broadcast' });
   }
 });
 

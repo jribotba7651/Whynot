@@ -1,5 +1,5 @@
-// Configuración de cuenta
-// Incluye: crear cuenta, cambiar contraseña, eliminar cuenta, lista de bloqueados
+// Account settings
+// Includes: create account, change password, delete account, blocked users list
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { changePassword, deleteAccount, getBlockedUsers, unblockUser } from '../../services/api';
@@ -17,7 +17,6 @@ const AccountSettings = ({ isOpen, onClose, onOpenAuth }) => {
   const [blockedUsers, setBlockedUsers] = useState([]);
   const [showBlocked, setShowBlocked] = useState(false);
 
-  // Cargar lista de bloqueados
   useEffect(() => {
     if (isOpen && showBlocked) {
       getBlockedUsers().then(data => setBlockedUsers(data.blocks || [])).catch(() => {});
@@ -30,7 +29,7 @@ const AccountSettings = ({ isOpen, onClose, onOpenAuth }) => {
     setError('');
     try {
       await changePassword(currentPassword, newPassword);
-      setSuccess('Contraseña actualizada');
+      setSuccess('Password updated');
       setShowChangePassword(false);
       setCurrentPassword('');
       setNewPassword('');
@@ -68,8 +67,8 @@ const AccountSettings = ({ isOpen, onClose, onOpenAuth }) => {
       <div className="flex-shrink-0 h-8 md:h-16" onClick={onClose} />
       <div className="flex-1 bg-dark-300 rounded-t-2xl overflow-y-auto">
         <div className="sticky top-0 bg-dark-300 border-b border-dark-100 px-4 py-3 flex items-center justify-between z-10">
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">Cerrar</button>
-          <h2 className="font-semibold">Cuenta</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">Close</button>
+          <h2 className="font-semibold">Account</h2>
           <div className="w-12" />
         </div>
 
@@ -77,21 +76,21 @@ const AccountSettings = ({ isOpen, onClose, onOpenAuth }) => {
           {isAnonymous ? (
             <>
               <div className="bg-yellow-900/30 border border-yellow-700/50 rounded-xl p-4">
-                <p className="text-yellow-200 font-medium text-sm">Estás usando una sesión temporal</p>
+                <p className="text-yellow-200 font-medium text-sm">You're using a temporary session</p>
                 <p className="text-yellow-300/80 text-xs mt-1">
-                  Tus conversaciones y perfil se guardarán por 30 días. Crea una cuenta para mantenerlos permanentemente.
+                  Your conversations and profile will be saved for 30 days. Create an account to keep them permanently.
                 </p>
               </div>
               <div className="bg-dark-200 rounded-xl p-4 space-y-3">
-                <h3 className="font-medium">Crear una cuenta</h3>
+                <h3 className="font-medium">Create an account</h3>
                 <ul className="text-sm text-gray-400 space-y-2">
-                  <li className="flex items-start gap-2"><span className="text-green-400 mt-0.5">✓</span>Tus datos se guardan permanentemente</li>
-                  <li className="flex items-start gap-2"><span className="text-green-400 mt-0.5">✓</span>Accede desde cualquier dispositivo</li>
-                  <li className="flex items-start gap-2"><span className="text-green-400 mt-0.5">✓</span>Envía broadcasts y da vibes</li>
+                  <li className="flex items-start gap-2"><span className="text-green-400 mt-0.5">✓</span>Your data is saved permanently</li>
+                  <li className="flex items-start gap-2"><span className="text-green-400 mt-0.5">✓</span>Access from any device</li>
+                  <li className="flex items-start gap-2"><span className="text-green-400 mt-0.5">✓</span>Send broadcasts and give vibes</li>
                 </ul>
                 <button onClick={() => { onClose(); onOpenAuth(); }}
                   className="w-full py-3 rounded-xl bg-primary-600 text-white font-medium hover:bg-primary-700 transition-colors mt-3">
-                  Crear cuenta
+                  Create account
                 </button>
               </div>
             </>
@@ -106,21 +105,21 @@ const AccountSettings = ({ isOpen, onClose, onOpenAuth }) => {
                 {!showChangePassword ? (
                   <button onClick={() => setShowChangePassword(true)}
                     className="text-primary-400 text-sm hover:text-primary-300 transition-colors">
-                    Cambiar contraseña
+                    Change password
                   </button>
                 ) : (
                   <div className="space-y-3">
                     <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)}
-                      placeholder="Contraseña actual"
+                      placeholder="Current password"
                       className="w-full bg-dark-300 border border-dark-100 rounded-xl px-4 py-3 text-white text-sm focus:border-primary-500 focus:outline-none" />
                     <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="Nueva contraseña (mín. 8 caracteres)"
+                      placeholder="New password (min. 8 characters)"
                       className="w-full bg-dark-300 border border-dark-100 rounded-xl px-4 py-3 text-white text-sm focus:border-primary-500 focus:outline-none" />
                     <div className="flex gap-2">
-                      <button onClick={() => setShowChangePassword(false)} className="flex-1 py-2 rounded-xl bg-dark-100 text-gray-300 text-sm">Cancelar</button>
+                      <button onClick={() => setShowChangePassword(false)} className="flex-1 py-2 rounded-xl bg-dark-100 text-gray-300 text-sm">Cancel</button>
                       <button onClick={handleChangePassword} disabled={saving || !currentPassword || newPassword.length < 8}
                         className="flex-1 py-2 rounded-xl bg-primary-600 text-white text-sm disabled:opacity-40">
-                        {saving ? 'Guardando...' : 'Cambiar'}
+                        {saving ? 'Saving...' : 'Change'}
                       </button>
                     </div>
                   </div>
@@ -129,22 +128,22 @@ const AccountSettings = ({ isOpen, onClose, onOpenAuth }) => {
 
               <button onClick={async () => { await logout(); onClose(); }}
                 className="w-full py-3 rounded-xl bg-dark-200 text-gray-300 hover:bg-dark-100 transition-colors">
-                Cerrar sesión
+                Log out
               </button>
 
               <div className="pt-4 border-t border-dark-100">
                 {!showDeleteConfirm ? (
                   <button onClick={() => setShowDeleteConfirm(true)} className="text-red-400 text-sm hover:text-red-300 transition-colors">
-                    Eliminar cuenta
+                    Delete account
                   </button>
                 ) : (
                   <div className="bg-red-900/20 border border-red-800/50 rounded-xl p-4">
                     <p className="text-red-300 text-sm mb-3">
-                      ¿Estás seguro? Tu cuenta se eliminará permanentemente en 7 días.
+                      Are you sure? Your account will be permanently deleted in 7 days.
                     </p>
                     <div className="flex gap-2">
-                      <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-2 rounded-xl bg-dark-200 text-sm">Cancelar</button>
-                      <button onClick={handleDeleteAccount} className="flex-1 py-2 rounded-xl bg-red-600 text-white text-sm">Sí, eliminar</button>
+                      <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-2 rounded-xl bg-dark-200 text-sm">Cancel</button>
+                      <button onClick={handleDeleteAccount} className="flex-1 py-2 rounded-xl bg-red-600 text-white text-sm">Yes, delete</button>
                     </div>
                   </div>
                 )}
@@ -152,24 +151,24 @@ const AccountSettings = ({ isOpen, onClose, onOpenAuth }) => {
             </>
           )}
 
-          {/* Usuarios bloqueados (Fase 6.2) */}
+          {/* Blocked users (Phase 6.2) */}
           <div className="pt-4 border-t border-dark-100">
             <button onClick={() => setShowBlocked(!showBlocked)}
               className="text-gray-400 text-sm hover:text-white transition-colors">
-              {showBlocked ? 'Ocultar bloqueados' : 'Usuarios bloqueados'}
+              {showBlocked ? 'Hide blocked' : 'Blocked users'}
             </button>
 
             {showBlocked && (
               <div className="mt-3 space-y-2">
                 {blockedUsers.length === 0 ? (
-                  <p className="text-gray-500 text-xs">No tienes usuarios bloqueados</p>
+                  <p className="text-gray-500 text-xs">You have no blocked users</p>
                 ) : (
                   blockedUsers.map((b) => (
                     <div key={b.id} className="flex items-center justify-between bg-dark-200 rounded-xl px-4 py-3">
                       <span className="text-sm">{b.displayName}</span>
                       <button onClick={() => handleUnblock(b.id)}
                         className="text-xs text-primary-400 hover:text-primary-300">
-                        Desbloquear
+                        Unblock
                       </button>
                     </div>
                   ))

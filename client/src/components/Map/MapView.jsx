@@ -1,5 +1,5 @@
-// Componente principal del mapa interactivo
-// Integra: pins por tipo, filtros, modo discreto, preview, broadcasts
+// Main interactive map component
+// Integrates: pins by type, filters, discrete mode, preview, broadcasts
 import { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import useGeolocation from '../../hooks/useGeolocation';
@@ -11,20 +11,16 @@ import PinPreview from './PinPreview';
 import VanillaToggle from '../UI/VanillaToggle';
 import { getPinColor, isCouple } from '../../utils/pinColors';
 
-// Token público de Mapbox (VITE_ prefix — seguro para el cliente)
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || '';
 
-// Ubicación por defecto si el usuario no da permiso (San Juan, PR)
 const DEFAULT_CENTER = [-66.1057, 18.4655];
 const DEFAULT_ZOOM = 14;
-
-// Tiempo máximo sin actualización antes de considerar un usuario como inactivo (ms)
 const STALE_THRESHOLD = 60000;
 
 const MapView = ({ onPinClick, chatUnreadMap, vanillaMode, onToggleVanilla, onShowBroadcasts, broadcastCount }) => {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
-  const markersRef = useRef({}); // { userId: marker }
+  const markersRef = useRef({});
   const userMarkerRef = useRef(null);
   const staleCheckRef = useRef(null);
 
@@ -38,7 +34,6 @@ const MapView = ({ onPinClick, chatUnreadMap, vanillaMode, onToggleVanilla, onSh
   const { socket, isConnected } = useSocket();
   const { user } = useAuth();
 
-  // Inicializar mapa de Mapbox
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
@@ -51,11 +46,7 @@ const MapView = ({ onPinClick, chatUnreadMap, vanillaMode, onToggleVanilla, onSh
     });
 
     map.addControl(new mapboxgl.AttributionControl({ compact: true }), 'bottom-right');
-
-    map.on('load', () => {
-      setMapLoaded(true);
-    });
-
+    map.on('load', () => setMapLoaded(true));
     mapRef.current = map;
 
     return () => {
@@ -71,7 +62,6 @@ const MapView = ({ onPinClick, chatUnreadMap, vanillaMode, onToggleVanilla, onSh
     };
   }, []);
 
-  // Actualizar posición del usuario actual en el mapa
   useEffect(() => {
     if (!mapRef.current || !mapLoaded || !location) return;
     const { latitude, longitude } = location;
@@ -88,7 +78,6 @@ const MapView = ({ onPinClick, chatUnreadMap, vanillaMode, onToggleVanilla, onSh
     }
   }, [location, mapLoaded]);
 
-  // Enviar ubicación por socket y recibir usuarios cercanos
   useEffect(() => {
     if (!socket || !isConnected || !location || !user?.id) return;
 
@@ -103,14 +92,12 @@ const MapView = ({ onPinClick, chatUnreadMap, vanillaMode, onToggleVanilla, onSh
     return () => socket.off('users:nearby', onNearbyUsers);
   }, [socket, isConnected, location, user?.id]);
 
-  // Actualizar markers de otros usuarios en el mapa
   useEffect(() => {
     if (!mapRef.current || !mapLoaded) return;
 
     const currentMarkerIds = new Set(Object.keys(markersRef.current));
     const newUserIds = new Set(nearbyUsers.map(u => u.id));
 
-    // Eliminar markers de usuarios que ya no están cerca
     for (const id of currentMarkerIds) {
       if (!newUserIds.has(id)) {
         markersRef.current[id].remove();
@@ -118,12 +105,10 @@ const MapView = ({ onPinClick, chatUnreadMap, vanillaMode, onToggleVanilla, onSh
       }
     }
 
-    // Agregar o actualizar markers
     nearbyUsers.forEach((nearbyUser) => {
       const { id, location: userLoc, displayName, isProfileComplete, userType } = nearbyUser;
       if (!userLoc?.longitude || !userLoc?.latitude) return;
 
-      // Filtrar por tipo de usuario (Fase 5.3)
       const isVisible = visibleTypes.size === 0 || visibleTypes.has(userType) || !userType;
 
       if (markersRef.current[id]) {
@@ -171,7 +156,6 @@ const MapView = ({ onPinClick, chatUnreadMap, vanillaMode, onToggleVanilla, onSh
     });
   }, [nearbyUsers, mapLoaded, chatUnreadMap, visibleTypes, vanillaMode]);
 
-  // Detección de usuarios inactivos — cada 15 segundos
   useEffect(() => {
     staleCheckRef.current = setInterval(() => {
       const now = Date.now();
@@ -204,21 +188,21 @@ const MapView = ({ onPinClick, chatUnreadMap, vanillaMode, onToggleVanilla, onSh
     <div className="relative w-full h-full">
       <div ref={mapContainerRef} className="w-full h-full" />
 
-      {/* Filtros de mapa (Fase 5.3) */}
+      {/* Map filters (Phase 5.3) */}
       <FilterBar seekingTypes={user?.seekingTypes} onFilterChange={handleFilterChange} />
 
-      {/* Controles superiores derecha */}
+      {/* Top-right controls */}
       <div className="absolute top-16 right-4 flex flex-col gap-2 z-20">
         <VanillaToggle isActive={vanillaMode} onToggle={onToggleVanilla} />
       </div>
 
-      {/* Broadcasts (Fase 6.4) */}
+      {/* Broadcasts (Phase 6.4) */}
       <div className="absolute top-16 left-4 z-20">
         <button
           onClick={onShowBroadcasts}
           className="relative w-10 h-10 bg-dark-200/90 backdrop-blur-sm rounded-full flex items-center justify-center
                      border border-dark-100 shadow-lg hover:bg-dark-100 transition-colors"
-          title="Updates del área"
+          title="Area updates"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -240,7 +224,7 @@ const MapView = ({ onPinClick, chatUnreadMap, vanillaMode, onToggleVanilla, onSh
         isConnected={isConnected}
       />
 
-      {/* Preview del pin (Fase 5.2) */}
+      {/* Pin preview (Phase 5.2) */}
       <PinPreview
         user={previewUser}
         currentUser={user}
@@ -249,27 +233,27 @@ const MapView = ({ onPinClick, chatUnreadMap, vanillaMode, onToggleVanilla, onSh
         vanillaMode={vanillaMode}
       />
 
-      {/* Estado de geolocalización */}
+      {/* Geolocation status */}
       {status === 'loading' && (
         <div className="absolute top-12 left-1/2 -translate-x-1/2 bg-dark-200 px-4 py-2 rounded-full text-sm animate-fade-in shadow-lg z-10">
-          <span className="animate-pulse">Obteniendo tu ubicación...</span>
+          <span className="animate-pulse">Getting your location...</span>
         </div>
       )}
       {status === 'permission-denied' && (
         <div className="absolute top-12 left-4 right-4 bg-yellow-900/90 border border-yellow-600 px-4 py-3 rounded-xl text-sm animate-fade-in z-10">
-          <p className="font-medium text-yellow-200">Ubicación no disponible</p>
-          <p className="text-yellow-300 mt-1">{geoError || 'Activa la ubicación en tu navegador para ver usuarios cercanos.'}</p>
+          <p className="font-medium text-yellow-200">Location unavailable</p>
+          <p className="text-yellow-300 mt-1">{geoError || 'Enable location in your browser to see nearby users.'}</p>
         </div>
       )}
       {status === 'error' && (
         <div className="absolute top-12 left-4 right-4 bg-red-900/90 border border-red-600 px-4 py-3 rounded-xl text-sm animate-fade-in z-10">
-          <p className="font-medium text-red-200">Error de ubicación</p>
+          <p className="font-medium text-red-200">Location error</p>
           <p className="text-red-300 mt-1">{geoError}</p>
         </div>
       )}
       {!isConnected && user && (
         <div className="absolute bottom-20 left-1/2 -translate-x-1/2 bg-red-900/90 px-4 py-2 rounded-full text-sm animate-fade-in">
-          Reconectando...
+          Reconnecting...
         </div>
       )}
     </div>

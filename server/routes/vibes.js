@@ -15,17 +15,17 @@ router.post('/', verifyToken, async (req, res) => {
     const fromUser = req.user;
 
     if (!toUserId || toUserId === fromUser._id.toString()) {
-      return res.status(400).json({ error: 'ID de usuario inválido' });
+      return res.status(400).json({ error: 'Invalid user ID' });
     }
 
     // Solo usuarios registrados pueden dar vibes
     if (fromUser.accountType !== 'registered') {
-      return res.status(403).json({ error: 'Crea una cuenta para dar vibes' });
+      return res.status(403).json({ error: 'Create an account to give vibes' });
     }
 
     const toUser = await User.findById(toUserId);
     if (!toUser || toUser.accountType !== 'registered') {
-      return res.status(400).json({ error: 'El usuario debe tener cuenta para recibir vibes' });
+      return res.status(400).json({ error: 'User must have an account to receive vibes' });
     }
 
     // Verificar que existe conversación con al menos 10 mensajes
@@ -35,12 +35,12 @@ router.post('/', verifyToken, async (req, res) => {
     });
 
     if (!conversation) {
-      return res.status(400).json({ error: 'Debes tener una conversación con este usuario' });
+      return res.status(400).json({ error: 'You must have a conversation with this user' });
     }
 
     const messageCount = await Message.countDocuments({ conversation: conversation._id });
     if (messageCount < 10) {
-      return res.status(400).json({ error: 'Necesitas al menos 10 mensajes en la conversación para dar una vibe' });
+      return res.status(400).json({ error: 'You need at least 10 messages in the conversation to give a vibe' });
     }
 
     // Crear la vibe
@@ -52,10 +52,10 @@ router.post('/', verifyToken, async (req, res) => {
     res.json({ success: true, newVibeCount: updated.vibeCount });
   } catch (error) {
     if (error.code === 11000) {
-      return res.status(400).json({ error: 'Ya le diste vibe a este usuario' });
+      return res.status(400).json({ error: 'You already gave a vibe to this user' });
     }
     console.error('[Vibes] Error dando vibe:', error.message);
-    res.status(500).json({ error: 'Error dando vibe' });
+    res.status(500).json({ error: 'Error giving vibe' });
   }
 });
 
@@ -63,10 +63,10 @@ router.post('/', verifyToken, async (req, res) => {
 router.get('/:userId', verifyToken, async (req, res) => {
   try {
     const user = await User.findById(req.params.userId).select('vibeCount').lean();
-    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+    if (!user) return res.status(404).json({ error: 'User not found' });
     res.json({ vibeCount: user.vibeCount || 0 });
   } catch (error) {
-    res.status(500).json({ error: 'Error obteniendo vibes' });
+    res.status(500).json({ error: 'Error getting vibes' });
   }
 });
 
@@ -91,7 +91,7 @@ router.get('/check/:userId', verifyToken, async (req, res) => {
       messageCount
     });
   } catch (error) {
-    res.status(500).json({ error: 'Error verificando vibes' });
+    res.status(500).json({ error: 'Error checking vibes' });
   }
 });
 

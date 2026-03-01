@@ -16,7 +16,7 @@ router.get('/nearby', verifyToken, async (req, res) => {
     const { lat, lon, radius } = req.query;
 
     if (!lat || !lon) {
-      return res.status(400).json({ error: 'Latitud y longitud son requeridas' });
+      return res.status(400).json({ error: 'Latitude and longitude are required' });
     }
 
     const latitude = parseFloat(lat);
@@ -25,7 +25,7 @@ router.get('/nearby', verifyToken, async (req, res) => {
 
     // Validar coordenadas
     if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
-      return res.status(400).json({ error: 'Coordenadas inválidas' });
+      return res.status(400).json({ error: 'Invalid coordinates' });
     }
 
     // Query geoespacial — usuarios cercanos que estén online
@@ -92,7 +92,7 @@ router.get('/nearby', verifyToken, async (req, res) => {
     res.json({ users: usersWithDistance });
   } catch (error) {
     console.error('[Users] Error buscando usuarios cercanos:', error.message);
-    res.status(500).json({ error: 'Error buscando usuarios cercanos' });
+    res.status(500).json({ error: 'Error searching for nearby users' });
   }
 });
 
@@ -105,7 +105,7 @@ router.get('/:id/profile', verifyToken, async (req, res) => {
     }).select('displayName profile isProfileComplete location lastSeen isOnline userType seekingTypes vibeCount').lean();
 
     if (!user) {
-      return res.status(404).json({ error: 'Usuario no encontrado' });
+      return res.status(404).json({ error: 'User not found' });
     }
 
     // Calcular distancia si el usuario que solicita tiene ubicación
@@ -136,7 +136,7 @@ router.get('/:id/profile', verifyToken, async (req, res) => {
     });
   } catch (error) {
     console.error('[Users] Error obteniendo perfil:', error.message);
-    res.status(500).json({ error: 'Error obteniendo perfil' });
+    res.status(500).json({ error: 'Error fetching profile' });
   }
 });
 
@@ -147,30 +147,30 @@ router.put('/profile', verifyToken, async (req, res) => {
 
     // Validaciones
     if (displayName && displayName.length > 30) {
-      return res.status(400).json({ error: 'El nombre no puede tener más de 30 caracteres' });
+      return res.status(400).json({ error: 'Name cannot exceed 30 characters' });
     }
 
     if (age !== undefined && (age < 18 || age > 99)) {
-      return res.status(400).json({ error: 'La edad debe estar entre 18 y 99 años' });
+      return res.status(400).json({ error: 'Age must be between 18 and 99' });
     }
 
     if (bio && bio.length > 200) {
-      return res.status(400).json({ error: 'La biografía no puede tener más de 200 caracteres' });
+      return res.status(400).json({ error: 'Bio cannot exceed 200 characters' });
     }
 
-    const validLookingFor = ['amistad', 'citas', 'networking', 'lo-que-sea'];
+    const validLookingFor = ['friendship', 'dating', 'networking', 'whatever'];
     if (lookingFor && !validLookingFor.includes(lookingFor)) {
-      return res.status(400).json({ error: 'Valor inválido para "qué buscas"' });
+      return res.status(400).json({ error: 'Invalid value for "looking for"' });
     }
 
-    const validInterests = ['música', 'deportes', 'arte', 'tecnología', 'gastronomía',
-      'viajes', 'gaming', 'lectura', 'fitness', 'cine'];
+    const validInterests = ['music', 'sports', 'art', 'technology', 'food',
+      'travel', 'gaming', 'reading', 'fitness', 'movies'];
     if (interests) {
       if (interests.length > 5) {
-        return res.status(400).json({ error: 'Máximo 5 intereses permitidos' });
+        return res.status(400).json({ error: 'Maximum 5 interests allowed' });
       }
       if (!interests.every(i => validInterests.includes(i))) {
-        return res.status(400).json({ error: 'Interés inválido detectado' });
+        return res.status(400).json({ error: 'Invalid interest detected' });
       }
     }
 
@@ -215,7 +215,7 @@ router.put('/profile', verifyToken, async (req, res) => {
     await user.save();
 
     res.json({
-      message: 'Perfil actualizado',
+      message: 'Profile updated',
       profile: user.profile,
       isProfileComplete: user.isProfileComplete,
       userType: user.userType,
@@ -225,7 +225,7 @@ router.put('/profile', verifyToken, async (req, res) => {
     });
   } catch (error) {
     console.error('[Users] Error actualizando perfil:', error.message);
-    res.status(500).json({ error: 'Error actualizando perfil' });
+    res.status(500).json({ error: 'Error updating profile' });
   }
 });
 
@@ -236,15 +236,15 @@ router.put('/onboarding', verifyToken, async (req, res) => {
 
     const validUserTypes = ['man', 'woman', 'couple_mf', 'couple_mm', 'couple_ff'];
     if (!userType || !validUserTypes.includes(userType)) {
-      return res.status(400).json({ error: 'Tipo de usuario inválido' });
+      return res.status(400).json({ error: 'Invalid user type' });
     }
 
     const validSeekingTypes = ['men', 'women', 'couples', 'anyone'];
     if (!seekingTypes || !Array.isArray(seekingTypes) || seekingTypes.length === 0) {
-      return res.status(400).json({ error: 'Debes seleccionar al menos un tipo de búsqueda' });
+      return res.status(400).json({ error: 'You must select at least one search type' });
     }
     if (!seekingTypes.every(s => validSeekingTypes.includes(s))) {
-      return res.status(400).json({ error: 'Tipo de búsqueda inválido' });
+      return res.status(400).json({ error: 'Invalid search type' });
     }
 
     const user = req.user;
@@ -254,14 +254,14 @@ router.put('/onboarding', verifyToken, async (req, res) => {
     await user.save();
 
     res.json({
-      message: 'Onboarding completado',
+      message: 'Onboarding completed',
       userType: user.userType,
       seekingTypes: user.seekingTypes,
       onboardingComplete: true
     });
   } catch (error) {
     console.error('[Users] Error guardando onboarding:', error.message);
-    res.status(500).json({ error: 'Error guardando onboarding' });
+    res.status(500).json({ error: 'Error saving onboarding' });
   }
 });
 
@@ -272,19 +272,19 @@ router.post('/reports', verifyToken, async (req, res) => {
   try {
     const { reportedUserId, reason, details } = req.body;
 
-    const validReasons = ['contenido_inapropiado', 'acoso', 'perfil_falso', 'menor_de_edad', 'otro'];
+    const validReasons = ['inappropriate_content', 'harassment', 'fake_profile', 'underage', 'other'];
     if (!reportedUserId || !reason || !validReasons.includes(reason)) {
-      return res.status(400).json({ error: 'Datos de reporte inválidos' });
+      return res.status(400).json({ error: 'Invalid report data' });
     }
 
     if (reportedUserId === req.userId.toString()) {
-      return res.status(400).json({ error: 'No puedes reportarte a ti mismo' });
+      return res.status(400).json({ error: 'You cannot report yourself' });
     }
 
     // Verificar que no haya un reporte duplicado
     const existing = await Report.findOne({ reporterId: req.userId, reportedUserId });
     if (existing) {
-      return res.status(400).json({ error: 'Ya has reportado a este usuario' });
+      return res.status(400).json({ error: 'You have already reported this user' });
     }
 
     // Crear el reporte
@@ -292,7 +292,7 @@ router.post('/reports', verifyToken, async (req, res) => {
       reporterId: req.userId,
       reportedUserId,
       reason,
-      details: reason === 'otro' ? details?.substring(0, 500) : undefined
+      details: reason === 'other' ? details?.substring(0, 500) : undefined
     });
 
     // Incrementar contador y aplicar shadow-ban si tiene 5+ reportes
@@ -308,10 +308,10 @@ router.post('/reports', verifyToken, async (req, res) => {
       console.log(`[Reports] Shadow-ban aplicado a usuario ${reportedUserId} (${reported.reportCount} reportes)`);
     }
 
-    res.json({ message: 'Reporte enviado. Gracias por ayudarnos a mantener la comunidad segura.' });
+    res.json({ message: 'Report submitted. Thank you for helping us keep the community safe.' });
   } catch (error) {
     console.error('[Users] Error creando reporte:', error.message);
-    res.status(500).json({ error: 'Error enviando reporte' });
+    res.status(500).json({ error: 'Error submitting report' });
   }
 });
 
@@ -323,17 +323,17 @@ router.post('/blocks', verifyToken, async (req, res) => {
     const { blockedUserId } = req.body;
 
     if (!blockedUserId || blockedUserId === req.userId.toString()) {
-      return res.status(400).json({ error: 'ID de usuario inválido' });
+      return res.status(400).json({ error: 'Invalid user ID' });
     }
 
     await Block.create({ blockerId: req.userId, blockedUserId });
-    res.json({ message: 'Usuario bloqueado' });
+    res.json({ message: 'User blocked' });
   } catch (error) {
     if (error.code === 11000) {
-      return res.json({ message: 'Usuario ya bloqueado' });
+      return res.json({ message: 'User already blocked' });
     }
     console.error('[Users] Error bloqueando usuario:', error.message);
-    res.status(500).json({ error: 'Error bloqueando usuario' });
+    res.status(500).json({ error: 'Error blocking user' });
   }
 });
 
@@ -341,10 +341,10 @@ router.post('/blocks', verifyToken, async (req, res) => {
 router.delete('/blocks/:blockedUserId', verifyToken, async (req, res) => {
   try {
     await Block.deleteOne({ blockerId: req.userId, blockedUserId: req.params.blockedUserId });
-    res.json({ message: 'Usuario desbloqueado' });
+    res.json({ message: 'User unblocked' });
   } catch (error) {
     console.error('[Users] Error desbloqueando:', error.message);
-    res.status(500).json({ error: 'Error desbloqueando usuario' });
+    res.status(500).json({ error: 'Error unblocking user' });
   }
 });
 
@@ -365,7 +365,7 @@ router.get('/blocks', verifyToken, async (req, res) => {
     });
   } catch (error) {
     console.error('[Users] Error obteniendo bloqueados:', error.message);
-    res.status(500).json({ error: 'Error obteniendo lista de bloqueados' });
+    res.status(500).json({ error: 'Error fetching blocked users list' });
   }
 });
 

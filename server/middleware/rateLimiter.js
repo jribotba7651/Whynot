@@ -7,7 +7,7 @@ const generalLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minuto
   max: 100,
   message: {
-    error: 'Demasiadas solicitudes. Intenta de nuevo en un minuto.'
+    error: 'Too many requests. Try again in a minute.'
   },
   standardHeaders: true,
   legacyHeaders: false
@@ -18,7 +18,7 @@ const authLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 5,
   message: {
-    error: 'Demasiados intentos de autenticación. Espera un minuto.'
+    error: 'Too many authentication attempts. Wait a minute.'
   },
   standardHeaders: true,
   legacyHeaders: false
@@ -29,7 +29,7 @@ const sessionLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 10,
   message: {
-    error: 'Demasiadas sesiones creadas. Espera un minuto.'
+    error: 'Too many sessions created. Wait a minute.'
   },
   standardHeaders: true,
   legacyHeaders: false

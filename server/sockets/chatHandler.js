@@ -23,7 +23,7 @@ const chatHandler = (io, socket) => {
       const { userId, targetUserId } = data;
 
       if (!userId || !targetUserId) {
-        return socket.emit('error', { message: 'IDs de usuario requeridos' });
+        return socket.emit('error', { message: 'User IDs required' });
       }
 
       // Verificar que el target existe
@@ -33,7 +33,7 @@ const chatHandler = (io, socket) => {
       });
 
       if (!targetUser) {
-        return socket.emit('error', { message: 'Usuario no encontrado' });
+        return socket.emit('error', { message: 'User not found' });
       }
 
       // Fase 6.2: Verificar bloqueos (en ambas direcciones)
@@ -44,7 +44,7 @@ const chatHandler = (io, socket) => {
         ]
       });
       if (blockExists) {
-        return socket.emit('error', { message: 'No puedes chatear con este usuario' });
+        return socket.emit('error', { message: 'You cannot chat with this user' });
       }
 
       // Buscar conversación existente entre ambos usuarios
@@ -63,7 +63,7 @@ const chatHandler = (io, socket) => {
 
         if (activeCount >= 50) {
           return socket.emit('error', {
-            message: 'Has alcanzado el límite de 50 conversaciones activas'
+            message: 'You have reached the limit of 50 active conversations'
           });
         }
 
@@ -89,7 +89,7 @@ const chatHandler = (io, socket) => {
       });
     } catch (error) {
       console.error('[Socket:Chat] Error iniciando chat:', error.message);
-      socket.emit('error', { message: 'Error iniciando conversación' });
+      socket.emit('error', { message: 'Error starting conversation' });
     }
   });
 
@@ -106,12 +106,12 @@ const chatHandler = (io, socket) => {
       const { conversationId, userId, text } = data;
 
       if (!conversationId || !userId || !text) {
-        return socket.emit('error', { message: 'Datos de mensaje incompletos' });
+        return socket.emit('error', { message: 'Incomplete message data' });
       }
 
       // Validar longitud del mensaje
       if (text.length > 500) {
-        return socket.emit('error', { message: 'El mensaje no puede tener más de 500 caracteres' });
+        return socket.emit('error', { message: 'Message cannot exceed 500 characters' });
       }
 
       // Verificar que el usuario es participante
@@ -122,7 +122,7 @@ const chatHandler = (io, socket) => {
       });
 
       if (!conversation) {
-        return socket.emit('error', { message: 'Conversación no encontrada' });
+        return socket.emit('error', { message: 'Conversation not found' });
       }
 
       // Fase 6.2: Verificar si el sender está bloqueado por el receiver
@@ -189,7 +189,7 @@ const chatHandler = (io, socket) => {
       }
     } catch (error) {
       console.error('[Socket:Chat] Error enviando mensaje:', error.message);
-      socket.emit('error', { message: 'Error enviando mensaje' });
+      socket.emit('error', { message: 'Error sending message' });
     }
   });
 
@@ -247,7 +247,7 @@ const chatHandler = (io, socket) => {
       });
 
       if (!conversation) {
-        return socket.emit('error', { message: 'Conversación no encontrada' });
+        return socket.emit('error', { message: 'Conversation not found' });
       }
 
       const query = { conversation: conversationId };

@@ -1,6 +1,6 @@
-// Componente principal de la aplicación
-// Integra mapa, chat, perfiles, autenticación, onboarding, broadcasts y modo discreto
-// Orquesta la navegación entre todas las vistas
+// Main application component
+// Integrates map, chat, profiles, authentication, onboarding, broadcasts, and discrete mode
+// Orchestrates navigation between all views
 import { useState, useCallback, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
@@ -18,13 +18,11 @@ import useChat from './hooks/useChat';
 import useVanillaMode from './hooks/useVanillaMode';
 import useGeolocation from './hooks/useGeolocation';
 
-// Componente interno que usa los contextos
 const AppContent = () => {
   const { user, isAnonymous, loading } = useAuth();
   const { vanillaMode, toggleVanilla } = useVanillaMode();
   const { location } = useGeolocation();
 
-  // Estado de vistas/modales
   const [selectedUser, setSelectedUser] = useState(null);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [showProfileEdit, setShowProfileEdit] = useState(false);
@@ -36,7 +34,6 @@ const AppContent = () => {
   const [showBroadcasts, setShowBroadcasts] = useState(false);
   const [broadcastCount, setBroadcastCount] = useState(0);
 
-  // Chat hook
   const {
     activeConversation, messages, conversations, setConversations,
     unreadTotal, setUnreadTotal, typingUsers, loadingMessages,
@@ -46,10 +43,8 @@ const AppContent = () => {
 
   const [chatTarget, setChatTarget] = useState(null);
 
-  // Mostrar onboarding si no completado
   useEffect(() => {
     if (user && !user.onboardingComplete && !loading) {
-      // Verificar localStorage como respaldo
       const savedType = localStorage.getItem('whynot_userType');
       if (!savedType) {
         setShowOnboarding(true);
@@ -57,19 +52,16 @@ const AppContent = () => {
     }
   }, [user, loading]);
 
-  // Click en un pin del mapa → mostrar perfil
   const handlePinClick = useCallback((nearbyUser) => {
     setSelectedUser(nearbyUser);
   }, []);
 
-  // Abrir chat desde ProfileCard
   const handleOpenChat = useCallback((targetUser) => {
     setSelectedUser(null);
     setChatTarget(targetUser);
     initiateChat(targetUser.id);
   }, [initiateChat]);
 
-  // Seleccionar conversación desde ChatList
   const handleSelectConversation = useCallback((conv) => {
     setShowChatList(false);
     setChatTarget({
@@ -80,13 +72,11 @@ const AppContent = () => {
     openConversation(conv.id);
   }, [openConversation]);
 
-  // Cerrar chat
   const handleCloseChat = useCallback(() => {
     closeChat();
     setChatTarget(null);
   }, [closeChat]);
 
-  // Prompt de perfil después de 3 conversaciones
   useEffect(() => {
     if (conversations.length >= 3 && !user?.isProfileComplete && !showProfileSetup) {
       const shown = sessionStorage.getItem('profile_prompt_shown');
@@ -97,26 +87,23 @@ const AppContent = () => {
     }
   }, [conversations.length, user?.isProfileComplete, showProfileSetup]);
 
-  // Pantalla de carga
   if (loading) {
     return (
       <div className="h-full flex items-center justify-center bg-dark-400">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-gray-400 mt-4 text-sm">Conectando...</p>
+          <p className="text-gray-400 mt-4 text-sm">Connecting...</p>
         </div>
       </div>
     );
   }
 
-  // Onboarding (Fase 5.1) — se muestra ANTES del mapa
   if (showOnboarding) {
     return (
       <OnboardingFlow onComplete={() => setShowOnboarding(false)} />
     );
   }
 
-  // Mapa de no leídos por usuario
   const chatUnreadMap = {};
   conversations.forEach(conv => {
     if (conv.unreadCount > 0 && conv.otherUser?.id) {
@@ -126,7 +113,6 @@ const AppContent = () => {
 
   return (
     <div className="h-full w-full relative">
-      {/* Mapa principal */}
       <MapView
         onPinClick={handlePinClick}
         chatUnreadMap={chatUnreadMap}
@@ -136,13 +122,13 @@ const AppContent = () => {
         broadcastCount={broadcastCount}
       />
 
-      {/* Botones de navegación (esquina inferior) */}
+      {/* Navigation buttons (bottom corner) */}
       <div className="absolute bottom-6 left-4 flex gap-3 z-20">
         <button
           onClick={() => setShowChatList(true)}
           className="relative w-12 h-12 bg-dark-200/90 backdrop-blur-sm rounded-full flex items-center justify-center
                      border border-dark-100 shadow-lg hover:bg-dark-100 transition-colors"
-          title="Mensajes"
+          title="Messages"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
@@ -155,14 +141,14 @@ const AppContent = () => {
         </button>
       </div>
 
-      {/* Botón: Menú (esquina inferior derecha) */}
+      {/* Menu button (bottom right) */}
       <div className="absolute bottom-6 right-4 z-20">
         <div className="relative">
           <button
             onClick={() => setShowMenu(!showMenu)}
             className="w-12 h-12 bg-dark-200/90 backdrop-blur-sm rounded-full flex items-center justify-center
                        border border-dark-100 shadow-lg hover:bg-dark-100 transition-colors"
-            title="Menú"
+            title="Menu"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" />
@@ -178,7 +164,7 @@ const AppContent = () => {
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" />
                 </svg>
-                Editar perfil
+                Edit profile
               </button>
 
               {!user?.isProfileComplete && (
@@ -189,7 +175,7 @@ const AppContent = () => {
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M12 5v14M5 12h14" />
                   </svg>
-                  Completar perfil
+                  Complete profile
                 </button>
               )}
 
@@ -201,7 +187,7 @@ const AppContent = () => {
                   <circle cx="12" cy="12" r="3" />
                   <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
                 </svg>
-                Cuenta
+                Account
               </button>
 
               {isAnonymous && (
@@ -212,7 +198,7 @@ const AppContent = () => {
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3" />
                   </svg>
-                  Iniciar sesión
+                  Log in
                 </button>
               )}
             </div>
@@ -222,7 +208,6 @@ const AppContent = () => {
 
       {showMenu && <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />}
 
-      {/* Modales y Drawers */}
       <ProfileCard
         user={selectedUser}
         onMessage={handleOpenChat}
@@ -279,7 +264,6 @@ const AppContent = () => {
   );
 };
 
-// App con Providers
 const App = () => {
   return (
     <AuthProvider>

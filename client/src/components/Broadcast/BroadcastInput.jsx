@@ -1,5 +1,5 @@
-// Input para enviar broadcast (Fase 6.4)
-// Con contador de caracteres y rate limit visual
+// Input for sending broadcasts (Phase 6.4)
+// With character counter and visual rate limit
 import { useState, useEffect } from 'react';
 
 const BroadcastInput = ({ onSend, isRegistered, lastSentAt }) => {
@@ -7,7 +7,7 @@ const BroadcastInput = ({ onSend, isRegistered, lastSentAt }) => {
   const [cooldown, setCooldown] = useState(0);
   const [sending, setSending] = useState(false);
 
-  // Countdown del rate limit (30 min)
+  // Countdown for rate limit (30 min)
   useEffect(() => {
     if (!lastSentAt) return;
     const update = () => {
@@ -31,7 +31,7 @@ const BroadcastInput = ({ onSend, isRegistered, lastSentAt }) => {
   if (!isRegistered) {
     return (
       <div className="bg-dark-200 rounded-xl p-3 text-center">
-        <p className="text-gray-400 text-xs">Crea una cuenta para enviar updates al área</p>
+        <p className="text-gray-400 text-xs">Create an account to send updates to the area</p>
       </div>
     );
   }
@@ -48,7 +48,7 @@ const BroadcastInput = ({ onSend, isRegistered, lastSentAt }) => {
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value.substring(0, 140))}
-          placeholder="Envía un update al área..."
+          placeholder="Send an update to the area..."
           rows={2}
           className="w-full bg-dark-200 border border-dark-100 rounded-xl px-3 py-2 text-white text-sm
                      focus:border-primary-500 focus:outline-none resize-none"
@@ -59,7 +59,7 @@ const BroadcastInput = ({ onSend, isRegistered, lastSentAt }) => {
 
       {cooldown > 0 ? (
         <p className="text-xs text-gray-500 text-center">
-          Siguiente broadcast en {formatCooldown(cooldown)}
+          Next broadcast in {formatCooldown(cooldown)}
         </p>
       ) : (
         <button
@@ -68,7 +68,7 @@ const BroadcastInput = ({ onSend, isRegistered, lastSentAt }) => {
           className="w-full py-2 bg-primary-600 rounded-xl text-sm font-medium text-white
                      hover:bg-primary-700 transition-colors disabled:opacity-40"
         >
-          {sending ? 'Enviando...' : 'Enviar broadcast'}
+          {sending ? 'Sending...' : 'Send broadcast'}
         </button>
       )}
     </div>

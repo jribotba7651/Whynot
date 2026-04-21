@@ -5,7 +5,7 @@ import os
 
 @MainActor
 final class BLEManager: NSObject, ObservableObject {
-    static let shared = BLEManager()
+    nonisolated(unsafe) static let shared = BLEManager()
 
     enum State: Equatable {
         case poweredOff

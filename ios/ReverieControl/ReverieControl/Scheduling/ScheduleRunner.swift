@@ -6,7 +6,7 @@ import os
 
 @MainActor
 final class ScheduleRunner {
-    static let shared = ScheduleRunner()
+    nonisolated(unsafe) static let shared = ScheduleRunner()
 
     private let log = Logger(subsystem: "com.reverie.ReverieControl", category: "Schedule")
     private let taskIdentifier = "com.reverie.ReverieControl.schedule"

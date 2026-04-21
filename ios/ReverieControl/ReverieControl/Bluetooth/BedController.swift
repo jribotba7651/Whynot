@@ -3,7 +3,7 @@ import Combine
 
 @MainActor
 final class BedController: ObservableObject {
-    static let shared = BedController()
+    nonisolated(unsafe) static let shared = BedController()
 
     private let ble: BLEManager
     private var holdTask: Task<Void, Never>?

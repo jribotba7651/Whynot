@@ -1,0 +1,50 @@
+# ESPHome Bluetooth Proxy for the Reverie bridge.
+#
+# Flash to any ESP32 (recommend a board with external antenna for range).
+#   esphome run reverie-proxy.yaml
+#
+# Place it within ~3 m of the bed and plug into a permanent outlet.
+
+substitutions:
+  device_name: reverie-proxy
+  friendly_name: Reverie Proxy
+
+esphome:
+  name: ${device_name}
+  friendly_name: ${friendly_name}
+  min_version: 2024.6.0
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+logger:
+
+api:
+  encryption:
+    # Generate one with: `esphome wizard` or any 32-byte base64 string.
+    key: !secret api_encryption_key
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: "Reverie Proxy Setup"
+    password: !secret fallback_password
+
+captive_portal:
+
+# Required for the BLE proxy. Active scan lets us also discover the bed's MAC.
+esp32_ble_tracker:
+  scan_parameters:
+    interval: 1100ms
+    window: 1100ms
+    active: true
+
+bluetooth_proxy:
+  active: true
